@@ -1,0 +1,94 @@
+﻿@page "/transactions"
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize]
+@rendermode InteractiveServer
+
+@inject IHttpClientFactory HttpClientFactory
+
+<h3>Транзакции</h3>
+
+@if (transactions == null)
+{
+    <p>Загрузка...</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Товар ID</th>
+                <th>Из локации</th>
+                <th>В локацию</th>
+                <th>Пользователь ID</th>
+                <th>Дата</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var transaction in transactions)
+            {
+                <tr>
+                    <td>@transaction.Id</td>
+                    <td>@transaction.ItemId</td>
+                    <td>@transaction.FromLocationId</td>
+                    <td>@transaction.ToLocationId</td>
+                    <td>@transaction.UserId</td>
+                    <td>@transaction.Timestamp</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <h4>Добавить транзакцию</h4>
+    <input type="number" @bind="newTransaction.ItemId" placeholder="Товар ID" class="form-control" />
+    <input type="number" @bind="newTransaction.FromLocationId" placeholder="Из локации" class="form-control mt-2" />
+    <input type="number" @bind="newTransaction.ToLocationId" placeholder="В локацию" class="form-control mt-2" />
+    <input type="number" @bind="newTransaction.UserId" placeholder="Пользователь ID" class="form-control mt-2" />
+    <input type="datetime-local" @bind="newTransaction.Timestamp" placeholder="Дата" class="form-control mt-2" />
+    <button class="btn btn-success mt-2" @onclick="SaveTransaction">Сохранить</button>
+}
+
+@code {
+    private List<TransactionResponseDTO> transactions; // Список транзакций
+    private TransactionCreateDTO newTransaction = new TransactionCreateDTO(); // DTO для создания транзакции
+
+    protected override async Task OnInitializedAsync()
+    {
+        var client = HttpClientFactory.CreateClient("ApiClient");
+        // Загружаем все транзакции с API
+        transactions = await client.GetFromJsonAsync<List<TransactionResponseDTO>>("api/transaction");
+    }
+
+    private async Task SaveTransaction()
+    {
+        var client = HttpClientFactory.CreateClient("ApiClient");
+
+        // Отправляем запрос на создание транзакции
+        await client.PostAsJsonAsync("api/transaction", newTransaction);
+
+        // Сбросить форму после сохранения
+        newTransaction = new TransactionCreateDTO();
+
+        // Обновить список транзакций
+        transactions = await client.GetFromJsonAsync<List<TransactionResponseDTO>>("api/transaction");
+    }
+
+    private class TransactionCreateDTO
+    {
+        public int ItemId { get; set; }
+        public int FromLocationId { get; set; }
+        public int ToLocationId { get; set; }
+        public int UserId { get; set; }
+        public DateTime Timestamp { get; set; }
+    }
+
+    private class TransactionResponseDTO
+    {
+        public int Id { get; set; }
+        public int ItemId { get; set; }
+        public int FromLocationId { get; set; }
+        public int ToLocationId { get; set; }
+        public int UserId { get; set; }
+        public DateTime Timestamp { get; set; }
+    }
+}

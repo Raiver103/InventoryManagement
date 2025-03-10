@@ -1,0 +1,123 @@
+﻿@page "/items"
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize]
+@rendermode InteractiveServer
+
+@inject IHttpClientFactory HttpClientFactory
+
+<h3>Товары</h3>
+
+@if (items == null)
+{
+    <p>Загрузка...</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Название</th>
+                <th>Категория</th>
+                <th>Количество</th>
+                <th>Локация</th>
+                <th>Действия</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in items)
+            {
+                <tr>
+                    <td>@item.Id</td>
+                    <td>@item.Name</td>
+                    <td>@item.Category</td>
+                    <td>@item.Quantity</td>
+                    <td>@item.LocationId</td>
+                    <td>
+                        <button class="btn btn-primary" @onclick="() => EditItem(item)">Редактировать</button>
+                        <button class="btn btn-danger" @onclick="() => DeleteItem(item.Id)">Удалить</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <h4>Добавить / Редактировать товар</h4>
+    <input type="text" @bind="newItem.Name" placeholder="Название" class="form-control" />
+    <input type="text" @bind="newItem.Category" placeholder="Категория" class="form-control mt-2" />
+    <input type="number" @bind="newItem.Quantity" placeholder="Количество" class="form-control mt-2" />
+    <input type="number" @bind="newItem.LocationId" placeholder="Локация ID" class="form-control mt-2" />
+    <button class="btn btn-success mt-2" @onclick="SaveItem">Сохранить</button>
+}
+
+@code {
+    private List<ItemResponseDTO> items; // Используем Response DTO для списка товаров
+    private ItemCreateDTO newItem = new ItemCreateDTO(); // Используем Create DTO для нового/редактируемого товара
+
+    protected override async Task OnInitializedAsync()
+    {
+        var client = HttpClientFactory.CreateClient("ApiClient");
+        // Получаем список товаров с API
+        items = await client.GetFromJsonAsync<List<ItemResponseDTO>>("api/item");
+    }
+
+    private async Task SaveItem()
+    {
+        Console.WriteLine("SaveItem вызван"); // Проверка в консоли Blazor
+        var client = HttpClientFactory.CreateClient("ApiClient");
+
+        if (newItem.Id == 0) // Если Id == 0, значит это новый товар
+        {
+            await client.PostAsJsonAsync("api/item", newItem);
+        }
+        else // Если Id уже есть, это обновление товара
+        {
+            await client.PutAsJsonAsync($"api/item/{newItem.Id}", newItem);
+        }
+
+        // Сбросить форму после сохранения
+        newItem = new ItemCreateDTO();
+        // Обновить список товаров
+        items = await client.GetFromJsonAsync<List<ItemResponseDTO>>("api/item");
+    }
+
+    private void EditItem(ItemResponseDTO item)
+    {
+        // При редактировании заполняем форму данными существующего товара
+        newItem = new ItemCreateDTO
+            {
+                Id = item.Id,
+                Name = item.Name,
+                Category = item.Category,
+                Quantity = item.Quantity,
+                LocationId = item.LocationId
+            };
+    }
+
+    private async Task DeleteItem(int id)
+    {
+        var client = HttpClientFactory.CreateClient("ApiClient");
+        // Отправляем запрос на удаление товара
+        await client.DeleteAsync($"api/item/{id}");
+        // Обновляем список товаров после удаления
+        items = await client.GetFromJsonAsync<List<ItemResponseDTO>>("api/item");
+    }
+
+    private class ItemCreateDTO
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public string Category { get; set; }
+        public int Quantity { get; set; }
+        public int LocationId { get; set; }
+    }
+
+    private class ItemResponseDTO
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public string Category { get; set; }
+        public int Quantity { get; set; }
+        public int LocationId { get; set; }
+    }
+}
