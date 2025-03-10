@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.12.35417.141
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "InventoryManagement.WebAPI", "InventoryManagement.WebAPI", "{1F43EC1A-24E0-4C1D-8854-6DECE3643C91}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "InventoryManagement.WEB", "InventoryManagement.WEB", "{1F43EC1A-24E0-4C1D-8854-6DECE3643C91}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "InventoryManagement.Domain", "InventoryManagement.Domain", "{7245B398-4689-4E84-B2B0-97956C4C3D62}"
 EndProject
