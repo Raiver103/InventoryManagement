@@ -77,31 +77,28 @@ namespace InventoryManagement.WEB.Controollers
 
             var userProfile = new UserProfile
             {
-                Name = User.Identity.Name,
-                EmailAddress = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value,
+                FirstName = User.FindFirst("https://your-app.com/first_name")?.Value,
+                LastName = User.FindFirst("https://your-app.com/last_name")?.Value,
+                EmailAddress = User.FindFirst(c => c.Type == "nickname")?.Value,
                 ProfileImage = User.Claims.FirstOrDefault(c => c.Type == "picture")?.Value
             };
             return View(userProfile);
         }
         private async Task SyncUser()
         {
-            foreach (var claim in User.Claims)
-            {
-                Console.WriteLine($"Type: {claim.Type}, Value: {claim.Value}");
-            }
             if (!User.Identity.IsAuthenticated)
                 return;
 
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var email = User.FindFirst(c => c.Type == "nickname")?.Value; var firstName = User.FindFirst("https://your-app.com/first_name")?.Value;
-            var lastName = User.FindFirst("https://your-app.com/last_name")?.Value;
-
-            var password = User.FindFirst(c => c.Type == "sid")?.Value;
-
             if (string.IsNullOrEmpty(userId))
             {
                 return; // Email обязателен для идентификации
             }
+
+            var email = User.FindFirst(c => c.Type == "nickname")?.Value; 
+            var firstName = User.FindFirst("https://your-app.com/first_name")?.Value;
+            var lastName = User.FindFirst("https://your-app.com/last_name")?.Value;
+            var password = User.FindFirst(c => c.Type == "sid")?.Value;
 
             var existingUser = await _userService.GetUserById(userId);
 
@@ -127,7 +124,8 @@ namespace InventoryManagement.WEB.Controollers
     {
         public string EmailAddress { get; set; }
 
-        public string Name { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
 
         public string ProfileImage { get; set; }
         public string UserId { get; set; }

@@ -57,12 +57,14 @@ namespace InventoryManagement.WEB.Controollers
 
             // Маппинг CreateDTO в сущность
             var user = _mapper.Map<User>(userCreateDto);
+            user.Id = Guid.NewGuid().ToString();
             user.PasswordHash = userCreateDto.PasswordHash; // Хэшируем пароль
 
             await _userService.AddUser(user);
 
             // Маппинг сущности в ResponseDTO для ответа
             var createdUserDto = _mapper.Map<UserResponseDTO>(user);
+
             return CreatedAtAction(nameof(GetUser), new { id = user.Id }, createdUserDto);
         }
 

@@ -54,6 +54,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
+
         var client = HttpClientFactory.CreateClient("ApiClient");
         // Загружаем все транзакции с API
         transactions = await client.GetFromJsonAsync<List<TransactionResponseDTO>>("api/transaction");

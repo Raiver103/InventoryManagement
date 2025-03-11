@@ -5,6 +5,8 @@ using InventoryManagement.Domain.Interfaces;
 using InventoryManagement.Infastructure.Persistence;
 using InventoryManagement.Infastructure.Repositories;
 using InventoryManagement.WEB.Components;
+using InventoryManagement.WEB.Controollers;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 
@@ -39,6 +41,7 @@ builder.Services.AddAutoMapper(typeof(MappingProfile).Assembly);
 
 builder.Services.AddDbContext<AppDbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddSingleton<IClaimsTransformation, ClaimsTransformation>();
 
 builder.Services.AddScoped<IItemRepository, ItemRepository>();
 builder.Services.AddScoped<ItemService>();

@@ -1,0 +1,126 @@
+﻿@page "/admin"
+@using Microsoft.AspNetCore.Authorization
+@rendermode InteractiveServer
+@attribute [Authorize(Roles = "Admin")]
+
+@inject IHttpClientFactory HttpClientFactory
+
+<h3>Пользователи</h3>
+
+@if (users == null)
+{
+    <p>Загрузка...</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Имя</th>
+                <th>Фамилия</th>
+                <th>Роль</th>
+                <th>Email</th>
+                <th>Действия</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var user in users)
+            {
+                <tr>
+                    <td>@user.Id</td>
+                    <td>@user.FirstName</td>
+                    <td>@user.LastName</td>
+                    <td>@user.Role</td>
+                    <td>@user.Email</td>
+                    <td>
+                        <button class="btn btn-primary" @onclick="() => EditUser(user)">Редактировать</button>
+                        <button class="btn btn-danger" @onclick="() => DeleteUser(user.Id)">Удалить</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <h4>Добавить / Редактировать пользователя</h4>
+    <input type="text" @bind="newUser.FirstName" placeholder="Имя" class="form-control" />
+    <input type="text" @bind="newUser.LastName" placeholder="Фамилия" class="form-control mt-2" />
+    <input type="email" @bind="newUser.Email" placeholder="Email" class="form-control mt-2" />
+    <select class="form-control mt-2" @bind="newUser.Role">
+        <option value="Employee">User</option>
+        <option value="Admin">Admin</option>
+    </select>
+
+    @if (string.IsNullOrWhiteSpace(newUser.Id)) // Показывать пароль только при создании нового пользователя
+    {
+        <input type="password" @bind="newUser.PasswordHash" placeholder="Пароль" class="form-control mt-2" />
+    }
+
+    <button class="btn btn-success mt-2" @onclick="SaveUser">Сохранить</button>
+}
+
+@code {
+    private List<UserResponseDTO> users;
+    private UserCreateDTO newUser = new UserCreateDTO();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var client = HttpClientFactory.CreateClient("ApiClient");
+        users = await client.GetFromJsonAsync<List<UserResponseDTO>>("api/user");
+    }
+
+    private async Task SaveUser()
+    {
+        var client = HttpClientFactory.CreateClient("ApiClient");
+
+        if (string.IsNullOrWhiteSpace(newUser.Id)) // Создание нового пользователя
+        {
+            await client.PostAsJsonAsync("api/user", newUser);
+        }
+        else // Обновление существующего пользователя
+        {
+            await client.PutAsJsonAsync($"api/user/{newUser.Id}", newUser);
+        }
+
+        newUser = new UserCreateDTO();
+        users = await client.GetFromJsonAsync<List<UserResponseDTO>>("api/user");
+    }
+
+    private void EditUser(UserResponseDTO user)
+    {
+        newUser = new UserCreateDTO
+            {
+                Id = user.Id,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Role = user.Role,
+                Email = user.Email
+            };
+    }
+
+    private async Task DeleteUser(string id)
+    {
+        var client = HttpClientFactory.CreateClient("ApiClient");
+        await client.DeleteAsync($"api/user/{id}");
+        users = await client.GetFromJsonAsync<List<UserResponseDTO>>("api/user");
+    }
+
+    private class UserCreateDTO
+    {
+        public string Id { get; set; } = string.Empty;
+        public string FirstName { get; set; } = string.Empty;
+        public string LastName { get; set; } = string.Empty;
+        public string Role { get; set; } = "Employee";
+        public string Email { get; set; } = string.Empty;
+        public string PasswordHash { get; set; } = string.Empty;
+    }
+
+    private class UserResponseDTO
+    {
+        public string Id { get; set; } = string.Empty;
+        public string FirstName { get; set; } = string.Empty;
+        public string LastName { get; set; } = string.Empty;
+        public string Role { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+    }
+}
