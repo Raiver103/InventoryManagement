@@ -15,7 +15,7 @@ namespace InventoryManagement.Domain.Entities
         public Location FromLocation { get; set; }
         public int ToLocationId { get; set; }
         public Location ToLocation { get; set; }
-        public int UserId { get; set; }
+        public string UserId { get; set; }
         public User User { get; set; } 
         public DateTime Timestamp { get; set; }
     }

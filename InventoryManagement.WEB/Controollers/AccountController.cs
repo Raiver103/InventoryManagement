@@ -8,11 +8,21 @@ using Auth0.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication;
 using InventoryManagement.Application.DTOs.User;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+using InventoryManagement.Application.Services;
+using InventoryManagement.Domain.Entities;
+using AutoMapper;
 
 namespace InventoryManagement.WEB.Controollers
 {
     public class AccountController : Controller
     {
+        private readonly UserService _userService;
+
+        public AccountController(UserService userService)
+        {
+            _userService = userService; 
+        }
+
         [HttpGet("/Account/Login")]
         public async Task LoginUser(string returnUrl = "/")
         {
@@ -23,9 +33,11 @@ namespace InventoryManagement.WEB.Controollers
             .WithRedirectUri(returnUrl)
             .Build();
 
-            await HttpContext.ChallengeAsync(Auth0Constants.AuthenticationScheme, authenticationProperties);
+            await HttpContext.ChallengeAsync(Auth0Constants.AuthenticationScheme, authenticationProperties); 
         }
 
+
+        [HttpGet("/Account/Signup")]
         public async Task Signup(string returnUrl = "/")
         {
             var authenticationProperties = new LoginAuthenticationPropertiesBuilder()
@@ -34,6 +46,7 @@ namespace InventoryManagement.WEB.Controollers
             .Build();
 
             await HttpContext.ChallengeAsync(Auth0Constants.AuthenticationScheme, authenticationProperties);
+            
         }
 
         [Authorize]
@@ -54,11 +67,13 @@ namespace InventoryManagement.WEB.Controollers
 
         [Authorize]
         [HttpGet("/Account/Profile")]
-        public IActionResult Profile()
+        public async Task<IActionResult> Profile()
         {
+
             var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
             // In your database, check if user exist's or not.
             // if(userNotExists)=> create new entry with 'userId'. You can alsow save Other user info.
+            await SyncUser();
 
             var userProfile = new UserProfile
             {
@@ -68,17 +83,43 @@ namespace InventoryManagement.WEB.Controollers
             };
             return View(userProfile);
         }
-
-        public IActionResult EmailVerification()
+        private async Task SyncUser()
         {
-            return View();
-        }
+            foreach (var claim in User.Claims)
+            {
+                Console.WriteLine($"Type: {claim.Type}, Value: {claim.Value}");
+            }
+            if (!User.Identity.IsAuthenticated)
+                return;
 
-        public IActionResult AccessDenied()
-        {
-            return View();
-        }
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var email = User.FindFirst(c => c.Type == "nickname")?.Value; var firstName = User.FindFirst("https://your-app.com/first_name")?.Value;
+            var lastName = User.FindFirst("https://your-app.com/last_name")?.Value;
 
+            var password = User.FindFirst(c => c.Type == "sid")?.Value;
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return; // Email обязателен для идентификации
+            }
+
+            var existingUser = await _userService.GetUserById(userId);
+
+            if (existingUser == null)
+            {
+                var newUser = new User
+                {
+                    Id = userId,
+                    Email = email,
+                    FirstName = firstName,
+                    LastName = lastName, 
+                    Role = "Employee",
+                    PasswordHash = password// Роль по умолчанию
+                };
+
+                await _userService.AddUser(newUser);
+            }
+        }
 
     }
 

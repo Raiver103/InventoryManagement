@@ -22,7 +22,7 @@ namespace InventoryManagement.Application.Services
             return await _userRepository.GetAllAsync();
         }
 
-        public async Task<User> GetUserById(int id)
+        public async Task<User> GetUserById(string id)
         {
             return await _userRepository.GetByIdAsync(id);
         }
@@ -37,7 +37,7 @@ namespace InventoryManagement.Application.Services
             await _userRepository.UpdateAsync(user);
         }
 
-        public async Task DeleteUser(int id)
+        public async Task DeleteUser(string id)
         {
             await _userRepository.DeleteAsync(id);
         }

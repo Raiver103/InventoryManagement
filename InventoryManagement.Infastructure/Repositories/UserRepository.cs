@@ -30,7 +30,7 @@ namespace InventoryManagement.Infastructure.Repositories
             await _context.SaveChangesAsync();
         }
 
-        public async Task DeleteAsync(int id)
+        public async Task DeleteAsync(string id)
         {
             var user = await GetByIdAsync(id);
             if (user != null)
@@ -45,7 +45,7 @@ namespace InventoryManagement.Infastructure.Repositories
             return await _context.Users.ToListAsync();
         }
 
-        public async Task<User> GetByIdAsync(int id)
+        public async Task<User> GetByIdAsync(string id)
         {
             return await _context.Users.FindAsync(id);
         }

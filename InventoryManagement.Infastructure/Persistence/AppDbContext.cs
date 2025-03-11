@@ -1,11 +1,5 @@
 ﻿using InventoryManagement.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection.Emit;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace InventoryManagement.Infastructure.Persistence
 {
@@ -20,8 +14,16 @@ namespace InventoryManagement.Infastructure.Persistence
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+
             base.OnModelCreating(modelBuilder);
-             
+
+            modelBuilder.Entity<User>()
+                .Property(u => u.Id)
+                .HasColumnType("nvarchar(450)");
+            modelBuilder.Entity<Transaction>()
+                .Property(u => u.UserId)
+                .HasColumnType("nvarchar(450)");
+
             modelBuilder.Entity<Item>()
                 .HasOne(i => i.Location)
                 .WithMany(l => l.Items)

@@ -68,7 +68,7 @@ namespace InventoryManagement.WEB.Controollers
 
         // Обновление пользователя
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] UserCreateDTO userUpdateDto)
+        public async Task<IActionResult> Update(string id, [FromBody] UserCreateDTO userUpdateDto)
         {
             if (userUpdateDto == null)
             {
@@ -95,7 +95,7 @@ namespace InventoryManagement.WEB.Controollers
 
         // Удаление пользователя
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> Delete(string id)
         {
             var user = await _userService.GetUserById(id);
             if (user == null)
@@ -107,37 +107,6 @@ namespace InventoryManagement.WEB.Controollers
             return NoContent();
         }
 
-        [Authorize]
-        [HttpPost("sync-user")]
-        public async Task<IActionResult> SyncUser()
-        {
-            const string name = "https://your-namespace/";
-            var userEmail = User.FindFirst(name + "email")?.Value;
-
-            if (string.IsNullOrEmpty(userEmail))
-            {
-                return BadRequest("Email not found in token.");
-            }
-
-            // Проверяем, существует ли пользователь с таким email
-            var user = await _userService.GetUserByEmail(userEmail);
-
-            if (user == null)
-            {
-                // Создаем нового пользователя
-                user = new User
-                {
-                    Email = userEmail,
-                    Role = "Employee", // Роль по умолчанию
-                    FirstName = User.FindFirst(name + "given_name")?.Value,
-                    LastName = User.FindFirst(name + "family_name")?.Value
-                };
-
-                // Добавляем пользователя в базу данных
-                await _userService.AddUser(user);
-            }
-
-            return Ok(user);
-        }
+        
     }
 }
