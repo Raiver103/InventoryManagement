@@ -1,4 +1,5 @@
 using Auth0.AspNetCore.Authentication;
+using Infrastructure.Repositories;
 using InventoryManagement.Application.Mapping;
 using InventoryManagement.Application.Services;
 using InventoryManagement.Domain.Interfaces;
@@ -56,6 +57,9 @@ builder.Services.AddScoped<LocationService>();
 
 builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
 builder.Services.AddScoped<TransactionService>();
+
+builder.Services.AddScoped<IAuth0Repository, Auth0Repository>();
+builder.Services.AddScoped<Auth0Service>();
 builder.Services.AddHttpClient("ApiClient", client =>
 {
     client.BaseAddress = new Uri("https://localhost:7025/"); // Замени на свой API URL

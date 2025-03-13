@@ -24,8 +24,19 @@ namespace InventoryManagement.WEB.Controollers
         }
 
         [HttpGet("/Account/Login")]
-        public async Task LoginUser(string returnUrl = "/")
+        public IActionResult LoginUserRedirect(string returnUrl = "/")
         {
+            return Redirect("https://localhost:7025/login");
+        }
+        [HttpGet("/Account/AccessDenied")]
+        public IActionResult LoginUserRedirectAccessDenied(string returnUrl = "/")
+        {
+            return Redirect("https://localhost:7025/login");
+        }
+
+        [HttpGet("/Auth/Login")]
+        public async Task LoginUser(string returnUrl = "/")
+        { 
             var authenticationProperties = new LoginAuthenticationPropertiesBuilder()
             // Indicate here where Auth0 should redirect the user after a login.
             // Note that the resulting absolute Uri must be added to the
@@ -33,9 +44,8 @@ namespace InventoryManagement.WEB.Controollers
             .WithRedirectUri(returnUrl)
             .Build();
 
-            await HttpContext.ChallengeAsync(Auth0Constants.AuthenticationScheme, authenticationProperties); 
+            await HttpContext.ChallengeAsync(Auth0Constants.AuthenticationScheme, authenticationProperties);
         }
-
 
         [HttpGet("/Account/Signup")]
         public async Task Signup(string returnUrl = "/")
@@ -95,10 +105,10 @@ namespace InventoryManagement.WEB.Controollers
                 return; // Email обязателен для идентификации
             }
 
-            var email = User.FindFirst(c => c.Type == "nickname")?.Value; 
-            var firstName = User.FindFirst("https://your-app.com/first_name")?.Value;
-            var lastName = User.FindFirst("https://your-app.com/last_name")?.Value;
-            var password = User.FindFirst(c => c.Type == "sid")?.Value;
+            var email = User.FindFirst(c => c.Type == "nickname")?.Value ?? "Не указано"; 
+            var firstName = User.FindFirst("https://your-app.com/first_name")?.Value ?? "Не указано";
+            var lastName = User.FindFirst("https://your-app.com/last_name")?.Value ?? "Не указано";
+            var password = User.FindFirst(c => c.Type == "sid")?.Value ?? "Не указано";
 
             var existingUser = await _userService.GetUserById(userId);
 
@@ -111,7 +121,7 @@ namespace InventoryManagement.WEB.Controollers
                     FirstName = firstName,
                     LastName = lastName, 
                     Role = "Employee",
-                    PasswordHash = password// Роль по умолчанию
+                    PasswordHash = password
                 };
 
                 await _userService.AddUser(newUser);

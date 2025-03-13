@@ -15,17 +15,9 @@ public class Auth0Service
         _userService = userService;
     }
 
-    public async Task<List<User>> GetUsersAsync()
+    public async Task<string> GetAccessTokenAsync()
     {
-        var auth0Users = await _auth0Repository.GetUsersAsync();
-        return auth0Users.Select(u => new User
-        {
-            Id = u.Id,
-            Email = u.Email,
-            FirstName = u.Metadata?.FirstName ?? "Не указано",
-            LastName = u.Metadata?.LastName ?? "Не указано",
-            Role = u.AppMetadata?.Role ?? "Не указано"
-        }).ToList();
+        return await _auth0Repository.GetAccessTokenAsync();
     }
 
     public async Task<User> CreateUserAsync(UserCreateDTO request)
@@ -39,20 +31,38 @@ public class Auth0Service
             LastName = request.LastName,
             Role = request.Role,
             Email = request.Email,
-            PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password)
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password),
+            ManagedItems = new List<Item>()
         };
 
         await _userService.AddUser(newUser);
         return newUser;
     }
 
-    public async Task<bool> UpdateUserAsync(string userId, UpdateUserRequest request)
+    public async Task<User> UpdateUserAsync(string userId, UpdateUserRequest request)
     {
-        return await _auth0Repository.UpdateUserAsync(userId, request);
+        var auth0User = await _auth0Repository.UpdateUserAsync(userId, request);
+
+        var user = await _userService.GetUserById(userId);
+        if (user == null) throw new Exception("Пользователь не найден в базе данных");
+
+        user.FirstName = request.FirstName;
+        user.LastName = request.LastName;
+        user.Email = request.Email;
+        user.Role = request.Role;
+
+        await _userService.UpdateUser(user);
+        return user;
     }
 
-    public async Task<bool> DeleteUserAsync(string userId)
+    public async Task<List<Auth0UserResponse>> GetUsersAsync()
     {
-        return await _auth0Repository.DeleteUserAsync(userId);
+        return await _auth0Repository.GetUsersAsync();
+    }
+
+    public async Task DeleteUserAsync(string userId)
+    {
+        await _auth0Repository.DeleteUserAsync(userId);
+        await _userService.DeleteUser(userId);
     }
 }
