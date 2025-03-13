@@ -1,4 +1,5 @@
 ﻿@page "/admin"
+@using InventoryManagement.Application.DTOs.User
 @using Microsoft.AspNetCore.Authorization
 @rendermode InteractiveServer
 @attribute [Authorize(Roles = "Admin")]
@@ -34,8 +35,8 @@ else
                     <td>@user.Role</td>
                     <td>@user.Email</td>
                     <td>
-                        <button class="btn btn-primary" @onclick="() => EditUser(user)">Редактировать</button>
-                        <button class="btn btn-danger" @onclick="() => DeleteUser(user.Id)">Удалить</button>
+                        <button class="btn btn-primary btn-sm" @onclick="() => EditUser(user)">Редактировать</button>
+                        <button class="btn btn-danger btn-sm" @onclick="() => DeleteUser(user.Id)">Удалить</button>
                     </td>
                 </tr>
             }
@@ -47,72 +48,120 @@ else
     <input type="text" @bind="newUser.LastName" placeholder="Фамилия" class="form-control mt-2" />
     <input type="email" @bind="newUser.Email" placeholder="Email" class="form-control mt-2" />
     <select class="form-control mt-2" @bind="newUser.Role">
-        <option value="Employee">User</option>
-        <option value="Admin">Admin</option>
+        <option value="Employee">Сотрудник</option>
+        <option value="Admin">Администратор</option>
+        <option value="Manager">Менеджер</option>
     </select>
 
-    @if (string.IsNullOrWhiteSpace(newUser.Id)) // Показывать пароль только при создании нового пользователя
+    @if (string.IsNullOrWhiteSpace(editingUserId))
     {
-        <input type="password" @bind="newUser.PasswordHash" placeholder="Пароль" class="form-control mt-2" />
+        <input type="password" @bind="newUser.Password" placeholder="Пароль" class="form-control mt-2" />
     }
 
     <button class="btn btn-success mt-2" @onclick="SaveUser">Сохранить</button>
+    <button class="btn btn-secondary mt-2" @onclick="CancelEdit">Отмена</button>
 }
 
 @code {
-    private List<UserResponseDTO> users;
-    private UserCreateDTO newUser = new UserCreateDTO();
+    private List<UserResponseDTO> users = new();
+    private UserCreateDTO newUser = new();
+    private string? editingUserId;
 
     protected override async Task OnInitializedAsync()
     {
+        await LoadUsers();
+    }
+
+    private async Task LoadUsers()
+    {
         var client = HttpClientFactory.CreateClient("ApiClient");
-        users = await client.GetFromJsonAsync<List<UserResponseDTO>>("api/user");
+        users = await client.GetFromJsonAsync<List<UserResponseDTO>>("api/auth0/get-users") ?? new();
     }
 
     private async Task SaveUser()
     {
         var client = HttpClientFactory.CreateClient("ApiClient");
+        HttpResponseMessage response;
 
-        if (string.IsNullOrWhiteSpace(newUser.Id)) // Создание нового пользователя
+        if (string.IsNullOrWhiteSpace(editingUserId))
         {
-            await client.PostAsJsonAsync("api/user", newUser);
+            response = await client.PostAsJsonAsync("api/auth0/create-user", newUser);
         }
-        else // Обновление существующего пользователя
+        else
         {
-            await client.PutAsJsonAsync($"api/user/{newUser.Id}", newUser);
+            var updateUser = new UserUpdateDTO
+                {
+                    FirstName = newUser.FirstName,
+                    LastName = newUser.LastName,
+                    Role = newUser.Role,
+                    Email = newUser.Email
+                };
+
+            response = await client.PatchAsJsonAsync($"api/auth0/update-user/{editingUserId}", updateUser);
         }
 
+        if (!response.IsSuccessStatusCode)
+        {
+            Console.WriteLine($"Ошибка API: {response.StatusCode}, {await response.Content.ReadAsStringAsync()}");
+        }
+
+        editingUserId = null;
         newUser = new UserCreateDTO();
-        users = await client.GetFromJsonAsync<List<UserResponseDTO>>("api/user");
+        await LoadUsers();
     }
 
     private void EditUser(UserResponseDTO user)
     {
+        editingUserId = user.Id;
         newUser = new UserCreateDTO
             {
-                Id = user.Id,
                 FirstName = user.FirstName,
                 LastName = user.LastName,
-                Role = user.Role,
+                Role = user.Role ?? "Employee",
                 Email = user.Email
             };
     }
 
     private async Task DeleteUser(string id)
     {
+        Console.WriteLine($"Удаление пользователя с ID: {id}");
+        if (string.IsNullOrWhiteSpace(id)) return;
+
+        var encodedId = Uri.EscapeDataString(id); // Кодируем ID
         var client = HttpClientFactory.CreateClient("ApiClient");
-        await client.DeleteAsync($"api/user/{id}");
-        users = await client.GetFromJsonAsync<List<UserResponseDTO>>("api/user");
+        var response = await client.DeleteAsync($"api/auth0/delete-user/{encodedId}");
+
+        if (!response.IsSuccessStatusCode)
+        {
+            var errorMessage = await response.Content.ReadAsStringAsync();
+            Console.WriteLine($"Ошибка удаления: {response.StatusCode}, {errorMessage}");
+        }
+
+        await LoadUsers();
+    }
+
+
+    private void CancelEdit()
+    {
+        editingUserId = null;
+        newUser = new UserCreateDTO();
     }
 
     private class UserCreateDTO
     {
-        public string Id { get; set; } = string.Empty;
         public string FirstName { get; set; } = string.Empty;
         public string LastName { get; set; } = string.Empty;
         public string Role { get; set; } = "Employee";
         public string Email { get; set; } = string.Empty;
-        public string PasswordHash { get; set; } = string.Empty;
+        public string Password { get; set; } = string.Empty;
+    }
+
+    private class UserUpdateDTO
+    {
+        public string FirstName { get; set; } = string.Empty;
+        public string LastName { get; set; } = string.Empty;
+        public string Role { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
     }
 
     private class UserResponseDTO
