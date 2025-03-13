@@ -4,6 +4,7 @@ using InventoryManagement.Application.DTOs.Location;
 using InventoryManagement.Application.DTOs.Transaction;
 using InventoryManagement.Application.DTOs.User;
 using InventoryManagement.Domain.Entities;
+using InventoryManagement.Domain.Entities.Auth0;
 using System;
 using System.Collections.Generic;
 using System.Linq;

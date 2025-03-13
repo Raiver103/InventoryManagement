@@ -1,5 +1,6 @@
-﻿@page "/admin"
+﻿@page "/admin" 
 @using InventoryManagement.Application.DTOs.User
+@using InventoryManagement.Domain.Entities.Auth0
 @using Microsoft.AspNetCore.Authorization
 @rendermode InteractiveServer
 @attribute [Authorize(Roles = "Admin")]
@@ -89,7 +90,7 @@ else
         }
         else
         {
-            var updateUser = new UserUpdateDTO
+            var updateUser = new UpdateUserRequest
                 {
                     FirstName = newUser.FirstName,
                     LastName = newUser.LastName,
@@ -145,31 +146,5 @@ else
     {
         editingUserId = null;
         newUser = new UserCreateDTO();
-    }
-
-    private class UserCreateDTO
-    {
-        public string FirstName { get; set; } = string.Empty;
-        public string LastName { get; set; } = string.Empty;
-        public string Role { get; set; } = "Employee";
-        public string Email { get; set; } = string.Empty;
-        public string Password { get; set; } = string.Empty;
-    }
-
-    private class UserUpdateDTO
-    {
-        public string FirstName { get; set; } = string.Empty;
-        public string LastName { get; set; } = string.Empty;
-        public string Role { get; set; } = string.Empty;
-        public string Email { get; set; } = string.Empty;
-    }
-
-    private class UserResponseDTO
-    {
-        public string Id { get; set; } = string.Empty;
-        public string FirstName { get; set; } = string.Empty;
-        public string LastName { get; set; } = string.Empty;
-        public string Role { get; set; } = string.Empty;
-        public string Email { get; set; } = string.Empty;
-    }
+    } 
 }

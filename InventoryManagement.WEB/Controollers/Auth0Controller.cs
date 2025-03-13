@@ -10,6 +10,7 @@ using InventoryManagement.Application.Services;
 using InventoryManagement.Infastructure.Persistence;
 using BCrypt.Net;
 using Azure.Core;
+using InventoryManagement.Domain.Entities.Auth0;
 
 [Route("api/auth0")]
 [ApiController]
@@ -18,14 +19,14 @@ public class Auth0Controller : ControllerBase
     private readonly HttpClient _httpClient;
     private readonly IConfiguration _config;
     private readonly string _auth0Domain;
-    private readonly AppDbContext _context;
+    private readonly UserService _userService;
 
-    public Auth0Controller(HttpClient httpClient, IConfiguration config, AppDbContext context)
+    public Auth0Controller(HttpClient httpClient, IConfiguration config, UserService userService)
     {
         _httpClient = httpClient;
         _config = config;
         _auth0Domain = _config["Auth0:Domain"];
-        _context = context;
+        _userService = userService;
     }
 
     [HttpPost("get-access-token")]
@@ -54,7 +55,7 @@ public class Auth0Controller : ControllerBase
     }
 
     [HttpPost("create-user")]
-    public async Task<IActionResult> CreateUser([FromBody] CreateUserRequest request)
+    public async Task<IActionResult> CreateUser([FromBody] UserCreateDTO request)
     {
         var url = $"https://{_auth0Domain}/api/v2/users";
         var accessToken = await GetAccessTokenAsync();
@@ -103,18 +104,63 @@ public class Auth0Controller : ControllerBase
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password),
             ManagedItems = new List<Item>()
         };
-        _context.Users.Add(newUser);
-        await _context.SaveChangesAsync();
+
+        await _userService.AddUser(newUser);
+        //_context.Users.Add(newUser);
+        //await _context.SaveChangesAsync();
         return Ok(newUser);
     }
 
+    //[HttpPatch("update-user/{userId}")]
+    //public async Task<IActionResult> UpdateUser(string userId, [FromBody] UpdateUserRequest request)
+    //{
+    //    var url = $"https://{_auth0Domain}/api/v2/users/{userId}";
+    //    var accessToken = await GetAccessTokenAsync();
+    //    if (string.IsNullOrEmpty(accessToken)) return Unauthorized("Не удалось получить токен");
+
+    //    var updatePayload = new
+    //    {
+    //        email = request.Email,
+    //        user_metadata = new
+    //        {
+    //            first_name = request.FirstName,
+    //            last_name = request.LastName
+    //        },
+    //        app_metadata = new
+    //        {
+    //            role = request.Role
+    //        }
+    //    };
+
+    //    var content = new StringContent(JsonConvert.SerializeObject(updatePayload), Encoding.UTF8, "application/json");
+    //    _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
+    //    var response = await _httpClient.PatchAsync(url, content);
+    //    if (!response.IsSuccessStatusCode) 
+    //        return BadRequest($"Ошибка обновления пользователя в Auth0: {response.StatusCode}, {await response.Content.ReadAsStringAsync()}");
+         
+    //    var user = await _userService.GetUserById(userId);
+
+    //    if (user == null) return NotFound("Пользователь не найден в базе данных");
+
+    //    user.FirstName = request.FirstName;
+    //    user.LastName = request.LastName;
+    //    user.Email = request.Email;
+    //    user.Role = request.Role;
+
+    //    await _userService.UpdateUser(user); 
+
+    //    return Ok(new { message = "Пользователь успешно обновлен", user });
+    //}
     [HttpPatch("update-user/{userId}")]
     public async Task<IActionResult> UpdateUser(string userId, [FromBody] UpdateUserRequest request)
     {
         var url = $"https://{_auth0Domain}/api/v2/users/{userId}";
         var accessToken = await GetAccessTokenAsync();
-        if (string.IsNullOrEmpty(accessToken)) return Unauthorized("Не удалось получить токен");
 
+        if (string.IsNullOrEmpty(accessToken))
+            return Unauthorized("Не удалось получить токен");
+
+        // 📌 1. Обновляем email, имя и фамилию в Auth0
         var updatePayload = new
         {
             email = request.Email,
@@ -131,19 +177,69 @@ public class Auth0Controller : ControllerBase
 
         var content = new StringContent(JsonConvert.SerializeObject(updatePayload), Encoding.UTF8, "application/json");
         _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
-        var response = await _httpClient.PatchAsync(url, content);
-        if (!response.IsSuccessStatusCode) return BadRequest($"Ошибка обновления пользователя в Auth0: {response.StatusCode}, {await response.Content.ReadAsStringAsync()}");
 
-        var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
-        if (user == null) return NotFound("Пользователь не найден в базе данных");
+        var response = await _httpClient.PatchAsync(url, content);
+        var responseString = await response.Content.ReadAsStringAsync();
+        var auth0User = JsonConvert.DeserializeObject<Auth0UserResponse>(responseString);
+        var auth0UserId = auth0User.Id;
+
+        if (!response.IsSuccessStatusCode)
+            return BadRequest($"Ошибка обновления пользователя в Auth0: {response.StatusCode}, {responseString}");
+
+        // 📌 2. Обновление роли в Auth0
+        var newRoleId = GetRoleId(request.Role);
+        if (string.IsNullOrEmpty(newRoleId))
+            return BadRequest("Ошибка: Указанная роль не найдена");
+
+        // Получаем текущие роли пользователя
+        var rolesUrl = $"https://{_auth0Domain}/api/v2/users/{userId}/roles";
+        var rolesResponse = await _httpClient.GetAsync(rolesUrl);
+        var rolesResponseString = await rolesResponse.Content.ReadAsStringAsync();
+
+        if (!rolesResponse.IsSuccessStatusCode)
+            return BadRequest($"Ошибка получения текущих ролей пользователя: {rolesResponse.StatusCode}, {rolesResponseString}");
+
+        var currentRoles = JsonConvert.DeserializeObject<List<Dictionary<string, string>>>(rolesResponseString);
+        var currentRoleIds = currentRoles?.Select(r => r["id"]).ToList() ?? new List<string>();
+
+        // Если роль изменилась, обновляем её
+        if (!currentRoleIds.Contains(newRoleId))
+        {
+            // Удаляем текущие роли
+            if (currentRoleIds.Any())
+            {
+                var removeRolesPayload = new { roles = currentRoleIds };
+                var removeRolesContent = new StringContent(JsonConvert.SerializeObject(removeRolesPayload), Encoding.UTF8, "application/json");
+                var removeRolesResponse = await _httpClient.SendAsync(new HttpRequestMessage(HttpMethod.Delete, rolesUrl) { Content = removeRolesContent });
+
+                if (!removeRolesResponse.IsSuccessStatusCode)
+                    return BadRequest($"Ошибка удаления старых ролей: {removeRolesResponse.StatusCode}, {await removeRolesResponse.Content.ReadAsStringAsync()}");
+            }
+
+            // Назначаем новую роль
+            var addRolesPayload = new { roles = new List<string> { newRoleId } };
+            var addRolesContent = new StringContent(JsonConvert.SerializeObject(addRolesPayload), Encoding.UTF8, "application/json");
+            var addRolesResponse = await _httpClient.PostAsync(rolesUrl, addRolesContent);
+
+            if (!addRolesResponse.IsSuccessStatusCode)
+                return BadRequest($"Ошибка назначения новой роли: {addRolesResponse.StatusCode}, {await addRolesResponse.Content.ReadAsStringAsync()}");
+        }
+
+        // 📌 3. Обновление пользователя в базе данных
+        //var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == auth0UserId);
+        var user = await _userService.GetUserById(userId);
+        if (user == null)
+            return NotFound("Пользователь не найден в базе данных");
 
         user.FirstName = request.FirstName;
         user.LastName = request.LastName;
         user.Email = request.Email;
-        user.Role = request.Role;
+        user.Role = request.Role; // Обновляем роль в БД
 
-        _context.Users.Update(user);
-        await _context.SaveChangesAsync();
+        await _userService.UpdateUser(user);
+        //_context.Users.Update(user);
+        //await _context.SaveChangesAsync();
+
         return Ok(new { message = "Пользователь успешно обновлен", user });
     }
     private string GetRoleId(string roleName)
@@ -157,6 +253,7 @@ public class Auth0Controller : ControllerBase
 
         return roles.ContainsKey(roleName) ? roles[roleName] : null;
     }
+
     [HttpGet("get-users")]
     public async Task<IActionResult> GetUsersFromAuth0()
     {
@@ -207,61 +304,15 @@ public class Auth0Controller : ControllerBase
         if (!response.IsSuccessStatusCode)
             return BadRequest($"Ошибка удаления пользователя в Auth0: {response.StatusCode}, {await response.Content.ReadAsStringAsync()}");
 
-        var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+        //var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+        var user = await _userService.GetUserById(userId);
         if (user != null)
         {
-            _context.Users.Remove(user);
-            await _context.SaveChangesAsync();
+            await _userService.DeleteUser(userId);
+            //_context.Users.Remove(user);
+            //await _context.SaveChangesAsync();
         }
 
         return Ok(new { message = "Пользователь успешно удален" });
     }
-}
- 
-
-public class CreateUserRequest
-{
-    public string Email { get; set; }
-    public string Password { get; set; }
-    public string FirstName { get; set; }
-    public string LastName { get; set; }
-    public string Role { get; set; }
-}
-
-public class UpdateUserRequest
-{
-    public string Email { get; set; }
-    public string FirstName { get; set; }
-    public string LastName { get; set; }
-    public string Role { get; set; }
-}
-public class Auth0UserResponse
-{
-    [JsonProperty("user_id")]
-    public string Id { get; set; }
-
-    [JsonProperty("email")]
-    public string Email { get; set; }
-
-    [JsonProperty("user_metadata")]
-    public UserMetadata Metadata { get; set; }
-
-    [JsonProperty("app_metadata")]
-    public AppMetadata AppMetadata { get; set; } // 👈 Добавил app_metadata
-    public string FirstName => Metadata?.FirstName;
-    public string LastName => Metadata?.LastName;
-    public string Role => AppMetadata?.Role;  // ✅ Теперь Role подтягивается
-}
-public class UserMetadata
-{
-    [JsonProperty("first_name")]
-    public string FirstName { get; set; }
-
-    [JsonProperty("last_name")]
-    public string LastName { get; set; }
-}
-public class AppMetadata
-{
-    [JsonProperty("role")]
-    public string Role { get; set; }
 }

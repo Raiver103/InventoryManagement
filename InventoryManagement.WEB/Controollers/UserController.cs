@@ -2,6 +2,7 @@
 using InventoryManagement.Application.DTOs.User;
 using InventoryManagement.Application.Services;
 using InventoryManagement.Domain.Entities;
+using InventoryManagement.Domain.Entities.Auth0;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -58,7 +59,7 @@ namespace InventoryManagement.WEB.Controollers
             // Маппинг CreateDTO в сущность
             var user = _mapper.Map<User>(userCreateDto);
             user.Id = Guid.NewGuid().ToString();
-            user.PasswordHash = userCreateDto.PasswordHash; // Хэшируем пароль
+            user.PasswordHash = userCreateDto.Password; // Хэшируем пароль
 
             await _userService.AddUser(user);
 
@@ -86,7 +87,7 @@ namespace InventoryManagement.WEB.Controollers
 
             // Маппинг CreateDTO в существующую сущность
             _mapper.Map(userUpdateDto, user);
-            user.PasswordHash = userUpdateDto.PasswordHash; // Хэшируем пароль
+            user.PasswordHash = userUpdateDto.Password; // Хэшируем пароль
 
             // Сохраняем изменения в базе данных
             await _userService.UpdateUser(user);
