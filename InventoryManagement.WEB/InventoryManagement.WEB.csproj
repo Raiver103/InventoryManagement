@@ -22,8 +22,4 @@
     <ProjectReference Include="..\InventoryManagement.Infastructure\InventoryManagement.Infastructure.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Components\Pages\Account\" />
-  </ItemGroup>
-
 </Project>
