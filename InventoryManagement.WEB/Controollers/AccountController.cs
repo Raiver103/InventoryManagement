@@ -15,29 +15,33 @@ using Newtonsoft.Json;
 using System.Net.Http;
 using System.Text;
 using Infrastructure.Repositories;
+using InventoryManagement.Domain.Interfaces;
+using InventoryManagement.Application.Models.Auth0;
 
 namespace InventoryManagement.WEB.Controollers
 {
     public class AccountController : Controller
     {
         private readonly UserService _userService;
+        private readonly IAuth0Repository _auth0Repository;
         private readonly HttpClient _httpClient;
         private readonly IConfiguration _config;
         private readonly string _auth0Domain;
 
-        public AccountController(UserService userService, HttpClient httpClient, IConfiguration config)
+        public AccountController(IAuth0Repository auth0Repository, UserService userService, HttpClient httpClient, IConfiguration config)
         {
             _userService = userService;
-
             _httpClient = httpClient;
             _config = config;
             _auth0Domain = _config["Auth0:Domain"];
+            _auth0Repository = auth0Repository;
         }
 
         [HttpGet("/Account/Login")]
         public async Task<IActionResult> LoginUserRedirect(string returnUrl = "/")
         {
             await AssignRoleAfterLogin();
+            await SyncUser();
             return Redirect("https://localhost:7025/login");
         }
 
@@ -58,8 +62,6 @@ namespace InventoryManagement.WEB.Controollers
             .Build();
 
             await HttpContext.ChallengeAsync(Auth0Constants.AuthenticationScheme, authenticationProperties);
-
-
         }
 
         [HttpGet("/Account/Signup")]
@@ -72,7 +74,7 @@ namespace InventoryManagement.WEB.Controollers
 
             await HttpContext.ChallengeAsync(Auth0Constants.AuthenticationScheme, authenticationProperties);
 
-            await AssignRoleAfterLogin();
+            //await AssignRoleAfterLogin();
         }
 
         [Authorize]
@@ -99,9 +101,9 @@ namespace InventoryManagement.WEB.Controollers
             var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
             // In your database, check if user exist's or not.
             // if(userNotExists)=> create new entry with 'userId'. You can alsow save Other user info.
-            await SyncUser();
+            //await SyncUser();
 
-            var userProfile = new UserProfile
+            var userProfile = new UserProfileDto
             {
                 FirstName = User.FindFirst("https://your-app.com/first_name")?.Value,
                 LastName = User.FindFirst("https://your-app.com/last_name")?.Value, 
@@ -110,6 +112,7 @@ namespace InventoryManagement.WEB.Controollers
             };
             return View(userProfile);
         }
+
         private async Task SyncUser()
         {
             if (!User.Identity.IsAuthenticated)
@@ -136,7 +139,7 @@ namespace InventoryManagement.WEB.Controollers
                     Email = email,
                     FirstName = firstName,
                     LastName = lastName, 
-                    Role = "Employee",
+                    Role = "Admin",
                     PasswordHash = password
                 };
 
@@ -162,13 +165,13 @@ namespace InventoryManagement.WEB.Controollers
             }
         }
 
-        public async Task AssignEmployeeRoleAsync(string userId)
+        private async Task AssignEmployeeRoleAsync(string userId)
         {
-            var accessToken = await GetAccessTokenAsync();
+            var accessToken = await _auth0Repository.GetAccessTokenAsync();
             if (string.IsNullOrEmpty(accessToken)) throw new Exception("Не удалось получить токен");
 
             // Получаем ID роли "Employee"
-            var roleId = GetRoleId("Employee");
+            var roleId = _auth0Repository.GetRoleId("Admin");
             if (string.IsNullOrEmpty(roleId)) throw new Exception("Ошибка: Роль 'Employee' не найдена");
 
             // Назначаем роль "Employee" через Auth0 API
@@ -183,45 +186,9 @@ namespace InventoryManagement.WEB.Controollers
                 throw new Exception($"Ошибка назначения роли: {roleResponse.StatusCode}, {await roleResponse.Content.ReadAsStringAsync()}");
         }
 
-        public string GetRoleId(string roleName)
-        {
-            var roles = new Dictionary<string, string>
-            {
-                { "Admin", "rol_6JJSMFRpkvMKUCr8" },
-                { "Employee", "rol_1zXKaYdC0yYkur5R" },
-                { "Manager", "rol_MroJU4loFATOSJTp" }
-            };
-
-            return roles.ContainsKey(roleName) ? roles[roleName] : null;
-        }
-
-        public async Task<string> GetAccessTokenAsync()
-        {
-            var url = $"https://{_auth0Domain}/oauth/token";
-            var payload = new
-            {
-                client_id = _config["Auth0M2M:ClientId"],
-                client_secret = _config["Auth0M2M:ClientSecret"],
-                audience = $"https://{_auth0Domain}/api/v2/",
-                grant_type = "client_credentials"
-            };
-
-            var content = new StringContent(JsonConvert.SerializeObject(payload), Encoding.UTF8, "application/json");
-            var response = await _httpClient.PostAsync(url, content);
-            var responseString = await response.Content.ReadAsStringAsync();
-
-            if (!response.IsSuccessStatusCode)
-            {
-                throw new Exception($"Ошибка получения токена: {response.StatusCode}, {responseString}");
-            }
-
-            var tokenResponse = JsonConvert.DeserializeObject<Dictionary<string, string>>(responseString);
-            return tokenResponse != null && tokenResponse.ContainsKey("access_token") ? tokenResponse["access_token"] : throw new Exception("Ответ не содержит access_token");
-        }
-
         private async Task<List<string>> GetUserRolesAsync(string userId)
         {
-            var accessToken = await GetAccessTokenAsync();
+            var accessToken = await _auth0Repository.GetAccessTokenAsync();
             if (string.IsNullOrEmpty(accessToken)) throw new Exception("Не удалось получить токен");
 
             var rolesUrl = $"https://{_auth0Domain}/api/v2/users/{userId}/roles";
@@ -239,23 +206,6 @@ namespace InventoryManagement.WEB.Controollers
 
             return roles?.Select(r => r.Name).ToList() ?? new List<string>();
         }
-
-        public class Auth0Role
-        {
-            public string Id { get; set; }
-            public string Name { get; set; }
-        }
-
-    }
-
-    public class UserProfile
-    {
-        public string EmailAddress { get; set; }
-
-        public string FirstName { get; set; }
-        public string LastName { get; set; }
-
-        public string ProfileImage { get; set; }
-        public string UserId { get; set; }
-    }
+         
+    } 
 }
