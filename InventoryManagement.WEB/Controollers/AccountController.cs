@@ -37,12 +37,12 @@ namespace InventoryManagement.WEB.Controollers
             _auth0Repository = auth0Repository;
         }
 
-        [HttpGet("/Account/Login")]
-        public async Task<IActionResult> LoginUserRedirect(string returnUrl = "/")
+        [HttpGet("/Account/AfterLogin")]
+        public async Task<IActionResult> AfterLogin(string returnUrl = "/")
         {
-            await AssignRoleAfterLogin();
-            await SyncUser();
-            return Redirect("https://localhost:7025/login");
+            await AssignRoleAfterLoginAsync("Admin");
+            await SyncUserDBAsync();
+            return Redirect("https://localhost:7025/afterlogin");
         }
 
         [HttpGet("/Account/AccessDenied")]
@@ -52,7 +52,7 @@ namespace InventoryManagement.WEB.Controollers
         }
 
         [HttpGet("/Auth/Login")]
-        public async Task LoginUser(string returnUrl = "/Account/Login")
+        public async Task LoginUser(string returnUrl = "/Account/AfterLogin")
         { 
             var authenticationProperties = new LoginAuthenticationPropertiesBuilder()
             // Indicate here where Auth0 should redirect the user after a login.
@@ -74,7 +74,7 @@ namespace InventoryManagement.WEB.Controollers
 
             await HttpContext.ChallengeAsync(Auth0Constants.AuthenticationScheme, authenticationProperties);
 
-            //await AssignRoleAfterLogin();
+            //await AssignRoleAfterLoginAsync();
         }
 
         [Authorize]
@@ -101,7 +101,7 @@ namespace InventoryManagement.WEB.Controollers
             var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
             // In your database, check if user exist's or not.
             // if(userNotExists)=> create new entry with 'userId'. You can alsow save Other user info.
-            //await SyncUser();
+            //await SyncUserDBAsync();
 
             var userProfile = new UserProfileDto
             {
@@ -113,7 +113,7 @@ namespace InventoryManagement.WEB.Controollers
             return View(userProfile);
         }
 
-        private async Task SyncUser()
+        private async Task SyncUserDBAsync()
         {
             if (!User.Identity.IsAuthenticated)
                 return;
@@ -147,7 +147,7 @@ namespace InventoryManagement.WEB.Controollers
             }
         }
 
-        private async Task AssignRoleAfterLogin()
+        private async Task AssignRoleAfterLoginAsync(string role)
         {
             if (!User.Identity.IsAuthenticated) return;
 
@@ -161,18 +161,19 @@ namespace InventoryManagement.WEB.Controollers
             var existingRoles = await GetUserRolesAsync(userId);
             if (existingRoles == null || !existingRoles.Any())
             {
-                await AssignEmployeeRoleAsync(userId);
+                await AssignRoleAsync(userId, role);
             }
         }
 
-        private async Task AssignEmployeeRoleAsync(string userId)
+        private async Task AssignRoleAsync(string userId, string role)
         {
             var accessToken = await _auth0Repository.GetAccessTokenAsync();
-            if (string.IsNullOrEmpty(accessToken)) throw new Exception("Не удалось получить токен");
+            if (string.IsNullOrEmpty(accessToken)) 
+                throw new Exception("Не удалось получить токен");
 
-            // Получаем ID роли "Employee"
-            var roleId = _auth0Repository.GetRoleId("Admin");
-            if (string.IsNullOrEmpty(roleId)) throw new Exception("Ошибка: Роль 'Employee' не найдена");
+            var roleId = _auth0Repository.GetRoleId(role);
+            if (string.IsNullOrEmpty(roleId)) 
+                throw new Exception("Ошибка: Роль не найдена");
 
             // Назначаем роль "Employee" через Auth0 API
             var roleAssignUrl = $"https://{_auth0Domain}/api/v2/users/{userId}/roles";
@@ -206,6 +207,6 @@ namespace InventoryManagement.WEB.Controollers
 
             return roles?.Select(r => r.Name).ToList() ?? new List<string>();
         }
-         
-    } 
+
+    }
 }
