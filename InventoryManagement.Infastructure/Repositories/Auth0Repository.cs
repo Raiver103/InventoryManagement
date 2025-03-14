@@ -51,7 +51,8 @@ namespace Infrastructure.Repositories
         {
             var url = $"https://{_auth0Domain}/api/v2/users";
             var accessToken = await GetAccessTokenAsync();
-            if (string.IsNullOrEmpty(accessToken)) throw new Exception("Не удалось получить токен");
+            if (string.IsNullOrEmpty(accessToken)) 
+                throw new Exception("Не удалось получить токен");
 
             var auth0Payload = new
             {

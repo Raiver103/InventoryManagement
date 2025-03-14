@@ -3,11 +3,12 @@ using InventoryManagement.Domain.Entities.Auth0;
 using InventoryManagement.Domain.Entities;
 using InventoryManagement.Domain.Interfaces;
 using BCrypt.Net;
+using Microsoft.Extensions.Configuration;
 
 public class Auth0Service
 {
     private readonly IAuth0Repository _auth0Repository;
-    private readonly UserService _userService;
+    private readonly UserService _userService; 
 
     public Auth0Service(IAuth0Repository auth0Repository, UserService userService)
     {
