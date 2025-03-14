@@ -56,4 +56,5 @@ namespace InventoryManagement.Infastructure.Repositories
             await _context.SaveChangesAsync();
         }
     }
+
 }

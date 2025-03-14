@@ -112,4 +112,5 @@ namespace InventoryManagement.WEB.Controollers
 
         
     }
+
 }

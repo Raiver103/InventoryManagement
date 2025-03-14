@@ -69,4 +69,5 @@ namespace InventoryManagement.Application.Services
             }
         }
     }
+
 }

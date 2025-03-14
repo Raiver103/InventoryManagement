@@ -43,7 +43,7 @@ else
     <input type="number" @bind="newTransaction.ItemId" placeholder="Товар ID" class="form-control" />
     <input type="number" @bind="newTransaction.FromLocationId" placeholder="Из локации" class="form-control mt-2" />
     <input type="number" @bind="newTransaction.ToLocationId" placeholder="В локацию" class="form-control mt-2" />
-    <input type="number" @bind="newTransaction.UserId" placeholder="Пользователь ID" class="form-control mt-2" />
+    <input type="text" @bind="newTransaction.UserId" placeholder="Пользователь ID" class="form-control mt-2" />
     <input type="datetime-local" @bind="newTransaction.Timestamp" placeholder="Дата" class="form-control mt-2" />
     <button class="btn btn-success mt-2" @onclick="SaveTransaction">Сохранить</button>
 }
@@ -79,7 +79,7 @@ else
         public int ItemId { get; set; }
         public int FromLocationId { get; set; }
         public int ToLocationId { get; set; }
-        public int UserId { get; set; }
+        public string UserId { get; set; }
         public DateTime Timestamp { get; set; }
     }
 
@@ -89,7 +89,7 @@ else
         public int ItemId { get; set; }
         public int FromLocationId { get; set; }
         public int ToLocationId { get; set; }
-        public int UserId { get; set; }
+        public string UserId { get; set; }
         public DateTime Timestamp { get; set; }
     }
 }

@@ -13,7 +13,7 @@ namespace InventoryManagement.Application.DTOs.Transaction
         public int ItemId { get; set; }
         public int FromLocationId { get; set; }
         public int ToLocationId { get; set; }
-        public int UserId { get; set; }
+        public string UserId { get; set; }
         public DateTime Timestamp { get; set; }
     }
 }

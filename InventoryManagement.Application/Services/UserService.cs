@@ -47,4 +47,5 @@ namespace InventoryManagement.Application.Services
             return await _userRepository.GetByEmailAsync(email);
         }
     }
+
 }
