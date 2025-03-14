@@ -22,27 +22,45 @@ namespace InventoryManagement.WEB.Controollers
 {
     public class AccountController : Controller
     {
-        private readonly UserService _userService;
-        private readonly IAuth0Repository _auth0Repository;
-        private readonly HttpClient _httpClient;
-        private readonly IConfiguration _config;
-        private readonly string _auth0Domain;
+        //private readonly UserService _userService;
+        //private readonly IAuth0Repository _auth0Repository;
+        //private readonly HttpClient _httpClient;
+        //private readonly IConfiguration _config;
+        //private readonly string _auth0Domain;
 
-        public AccountController(IAuth0Repository auth0Repository, UserService userService, HttpClient httpClient, IConfiguration config)
+        private readonly AccountService _accountService;
+        public AccountController(
+            /*IAuth0Repository auth0Repository, 
+            UserService userService, 
+            HttpClient httpClient, 
+            IConfiguration config*/
+            AccountService accountService
+            )
         {
-            _userService = userService;
-            _httpClient = httpClient;
-            _config = config;
-            _auth0Domain = _config["Auth0:Domain"];
-            _auth0Repository = auth0Repository;
+            _accountService = accountService;
+            //_userService = userService;
+            //_httpClient = httpClient;
+            //_config = config;
+            //_auth0Domain = _config["Auth0:Domain"];
+            //_auth0Repository = auth0Repository;
         }
 
         [HttpGet("/Account/AfterLogin")]
         public async Task<IActionResult> AfterLogin(string returnUrl = "/")
         {
-            await AssignRoleAfterLoginAsync("Admin");
-            await SyncUserDBAsync();
+            //await AssignRoleAfterLoginAsync("Admin");
+            //await SyncUserDBAsync();
+            await _accountService.AssignRoleAfterLoginAsync(User, "Admin");
+            await _accountService.SyncUserAsync(User);
             return Redirect("https://localhost:7025/afterlogin");
+        }
+
+        [HttpGet("/Account/Login")]
+        public async Task<IActionResult> Login(string returnUrl = "/")
+        {
+            //await AssignRoleAfterLoginAsync("Admin");
+            //await SyncUserDBAsync(); 
+            return Redirect("https://localhost:7025/login");
         }
 
         [HttpGet("/Account/AccessDenied")]
@@ -113,100 +131,100 @@ namespace InventoryManagement.WEB.Controollers
             return View(userProfile);
         }
 
-        private async Task SyncUserDBAsync()
-        {
-            if (!User.Identity.IsAuthenticated)
-                return;
+        //private async Task SyncUserDBAsync()
+        //{
+        //    if (!User.Identity.IsAuthenticated)
+        //        return;
 
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(userId))
-            {
-                return; // Email обязателен для идентификации
-            }
+        //    var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        //    if (string.IsNullOrEmpty(userId))
+        //    {
+        //        return; // Email обязателен для идентификации
+        //    }
 
-            var email = User.FindFirst(c => c.Type == "nickname")?.Value ?? "Не указано"; 
-            var firstName = User.FindFirst("https://your-app.com/first_name")?.Value ?? "Не указано";
-            var lastName = User.FindFirst("https://your-app.com/last_name")?.Value ?? "Не указано";
-            var password = User.FindFirst(c => c.Type == "sid")?.Value ?? "Не указано";
+        //    var email = User.FindFirst(c => c.Type == "nickname")?.Value ?? "Не указано"; 
+        //    var firstName = User.FindFirst("https://your-app.com/first_name")?.Value ?? "Не указано";
+        //    var lastName = User.FindFirst("https://your-app.com/last_name")?.Value ?? "Не указано";
+        //    var password = User.FindFirst(c => c.Type == "sid")?.Value ?? "Не указано";
 
-            var existingUser = await _userService.GetUserById(userId);
+        //    var existingUser = await _userService.GetUserById(userId);
 
-            if (existingUser == null)
-            {
-                var newUser = new User
-                {
-                    Id = userId,
-                    Email = email,
-                    FirstName = firstName,
-                    LastName = lastName, 
-                    Role = "Admin",
-                    PasswordHash = password
-                };
+        //    if (existingUser == null)
+        //    {
+        //        var newUser = new User
+        //        {
+        //            Id = userId,
+        //            Email = email,
+        //            FirstName = firstName,
+        //            LastName = lastName, 
+        //            Role = "Admin",
+        //            PasswordHash = password
+        //        };
 
-                await _userService.AddUser(newUser);
-            }
-        }
+        //        await _userService.AddUser(newUser);
+        //    }
+        //}
 
-        private async Task AssignRoleAfterLoginAsync(string role)
-        {
-            if (!User.Identity.IsAuthenticated) return;
+        //private async Task AssignRoleAfterLoginAsync(string role)
+        //{
+        //    if (!User.Identity.IsAuthenticated) return;
 
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(userId))
-            {
-                throw new Exception("Ошибка: Не удалось получить идентификатор пользователя.");
-            }
+        //    var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        //    if (string.IsNullOrEmpty(userId))
+        //    {
+        //        throw new Exception("Ошибка: Не удалось получить идентификатор пользователя.");
+        //    }
 
-            // Проверяем, есть ли у пользователя уже роли
-            var existingRoles = await GetUserRolesAsync(userId);
-            if (existingRoles == null || !existingRoles.Any())
-            {
-                await AssignRoleAsync(userId, role);
-            }
-        }
+        //    // Проверяем, есть ли у пользователя уже роли
+        //    var existingRoles = await GetUserRolesAsync(userId);
+        //    if (existingRoles == null || !existingRoles.Any())
+        //    {
+        //        await AssignRoleAsync(userId, role);
+        //    }
+        //}
 
-        private async Task AssignRoleAsync(string userId, string role)
-        {
-            var accessToken = await _auth0Repository.GetAccessTokenAsync();
-            if (string.IsNullOrEmpty(accessToken)) 
-                throw new Exception("Не удалось получить токен");
+        //private async Task AssignRoleAsync(string userId, string role)
+        //{
+        //    var accessToken = await _auth0Repository.GetAccessTokenAsync();
+        //    if (string.IsNullOrEmpty(accessToken)) 
+        //        throw new Exception("Не удалось получить токен");
 
-            var roleId = _auth0Repository.GetRoleId(role);
-            if (string.IsNullOrEmpty(roleId)) 
-                throw new Exception("Ошибка: Роль не найдена");
+        //    var roleId = _auth0Repository.GetRoleId(role);
+        //    if (string.IsNullOrEmpty(roleId)) 
+        //        throw new Exception("Ошибка: Роль не найдена");
 
-            // Назначаем роль "Employee" через Auth0 API
-            var roleAssignUrl = $"https://{_auth0Domain}/api/v2/users/{userId}/roles";
-            var roleAssignPayload = new { roles = new List<string> { roleId } };
-            var roleContent = new StringContent(JsonConvert.SerializeObject(roleAssignPayload), Encoding.UTF8, "application/json");
+        //    // Назначаем роль "Employee" через Auth0 API
+        //    var roleAssignUrl = $"https://{_auth0Domain}/api/v2/users/{userId}/roles";
+        //    var roleAssignPayload = new { roles = new List<string> { roleId } };
+        //    var roleContent = new StringContent(JsonConvert.SerializeObject(roleAssignPayload), Encoding.UTF8, "application/json");
 
-            _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
-            var roleResponse = await _httpClient.PostAsync(roleAssignUrl, roleContent);
+        //    _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
+        //    var roleResponse = await _httpClient.PostAsync(roleAssignUrl, roleContent);
 
-            if (!roleResponse.IsSuccessStatusCode)
-                throw new Exception($"Ошибка назначения роли: {roleResponse.StatusCode}, {await roleResponse.Content.ReadAsStringAsync()}");
-        }
+        //    if (!roleResponse.IsSuccessStatusCode)
+        //        throw new Exception($"Ошибка назначения роли: {roleResponse.StatusCode}, {await roleResponse.Content.ReadAsStringAsync()}");
+        //}
 
-        private async Task<List<string>> GetUserRolesAsync(string userId)
-        {
-            var accessToken = await _auth0Repository.GetAccessTokenAsync();
-            if (string.IsNullOrEmpty(accessToken)) throw new Exception("Не удалось получить токен");
+        //private async Task<List<string>> GetUserRolesAsync(string userId)
+        //{
+        //    var accessToken = await _auth0Repository.GetAccessTokenAsync();
+        //    if (string.IsNullOrEmpty(accessToken)) throw new Exception("Не удалось получить токен");
 
-            var rolesUrl = $"https://{_auth0Domain}/api/v2/users/{userId}/roles";
+        //    var rolesUrl = $"https://{_auth0Domain}/api/v2/users/{userId}/roles";
 
-            _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
-            var response = await _httpClient.GetAsync(rolesUrl);
+        //    _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
+        //    var response = await _httpClient.GetAsync(rolesUrl);
 
-            if (!response.IsSuccessStatusCode)
-            {
-                throw new Exception($"Ошибка получения ролей пользователя: {response.StatusCode}, {await response.Content.ReadAsStringAsync()}");
-            }
+        //    if (!response.IsSuccessStatusCode)
+        //    {
+        //        throw new Exception($"Ошибка получения ролей пользователя: {response.StatusCode}, {await response.Content.ReadAsStringAsync()}");
+        //    }
 
-            var responseString = await response.Content.ReadAsStringAsync();
-            var roles = JsonConvert.DeserializeObject<List<Auth0Role>>(responseString);
+        //    var responseString = await response.Content.ReadAsStringAsync();
+        //    var roles = JsonConvert.DeserializeObject<List<Auth0Role>>(responseString);
 
-            return roles?.Select(r => r.Name).ToList() ?? new List<string>();
-        }
+        //    return roles?.Select(r => r.Name).ToList() ?? new List<string>();
+        //}
 
     }
 }

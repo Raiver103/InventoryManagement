@@ -5,6 +5,7 @@ using InventoryManagement.Application.Services;
 using InventoryManagement.Domain.Interfaces;
 using InventoryManagement.Infastructure.Persistence;
 using InventoryManagement.Infastructure.Repositories;
+using InventoryManagement.Infrastructure.Repositories;
 using InventoryManagement.WEB.Components;
 using InventoryManagement.WEB.Controollers;
 using Microsoft.AspNetCore.Authentication;
@@ -60,6 +61,10 @@ builder.Services.AddScoped<TransactionService>();
 
 builder.Services.AddScoped<IAuth0Repository, Auth0Repository>();
 builder.Services.AddScoped<Auth0Service>();
+
+builder.Services.AddScoped<IAccountRepository, AccountRepository>();
+builder.Services.AddScoped<AccountService>();
+
 builder.Services.AddHttpClient("ApiClient", client =>
 {
     client.BaseAddress = new Uri("https://localhost:7025/"); // Замени на свой API URL

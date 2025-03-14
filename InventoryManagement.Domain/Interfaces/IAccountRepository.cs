@@ -8,7 +8,7 @@ namespace InventoryManagement.Domain.Interfaces
 {
     public interface IAccountRepository
     {
-        Task<List<string>> AssignRoleAfterLoginAsync(string role);
-        Task SyncUserDBAsync();
+        Task<List<string>> GetUserRolesAsync(string userId);
+        Task AssignRoleAsync(string userId, string roleId);
     }
 }
