@@ -19,10 +19,10 @@ namespace InventoryManagement.Infastructure.Repositories
             _context = context;
         }
 
-        public async Task<User> GetByEmailAsync(string email) // Реализация нового метода
-        {
-            return await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
-        }
+        //public async Task<User> GetByEmailAsync(string email) // Реализация нового метода
+        //{
+        //    return await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+        //}
 
         public async Task AddAsync(User user)
         {
@@ -40,10 +40,10 @@ namespace InventoryManagement.Infastructure.Repositories
             }
         }
 
-        public async Task<IEnumerable<User>> GetAllAsync()
-        {
-            return await _context.Users.ToListAsync();
-        }
+        //public async Task<IEnumerable<User>> GetAllAsync()
+        //{
+        //    return await _context.Users.ToListAsync();
+        //}
 
         public async Task<User> GetByIdAsync(string id)
         {
