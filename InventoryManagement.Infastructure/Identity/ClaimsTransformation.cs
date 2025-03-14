@@ -23,5 +23,4 @@ namespace InventoryManagement.Infastructure.Identity
             return Task.FromResult(principal);
         }
     }
-
 }

@@ -5,12 +5,6 @@ using InventoryManagement.Application.DTOs.Transaction;
 using InventoryManagement.Application.DTOs.User;
 using InventoryManagement.Domain.Entities;
 using InventoryManagement.Domain.Entities.Auth0;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace InventoryManagement.Application.Mapping
 {
@@ -19,7 +13,7 @@ namespace InventoryManagement.Application.Mapping
         public MappingProfile()
         {
             // Конфигурируем маппинг для всех сущностей и их DTO
-            CreateMap<User, UserCreateDTO>().ReverseMap();
+            CreateMap<User, CreateUserRequest>().ReverseMap();
             CreateMap<User, UserResponseDTO>().ReverseMap(); 
 
             CreateMap<Location, LocationCreateDTO>().ReverseMap();

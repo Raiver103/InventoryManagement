@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using InventoryManagement.Domain.Entities.Auth0.Metadata;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;

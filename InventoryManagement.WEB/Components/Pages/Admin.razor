@@ -65,7 +65,7 @@ else
 
 @code {
     private List<UserResponseDTO> users = new();
-    private UserCreateDTO newUser = new();
+    private CreateUserRequest newUser = new();
     private string? editingUserId;
 
     protected override async Task OnInitializedAsync()
@@ -107,14 +107,14 @@ else
         }
 
         editingUserId = null;
-        newUser = new UserCreateDTO();
+        newUser = new CreateUserRequest();
         await LoadUsers();
     }
 
     private void EditUser(UserResponseDTO user)
     {
         editingUserId = user.Id;
-        newUser = new UserCreateDTO
+        newUser = new CreateUserRequest
             {
                 FirstName = user.FirstName,
                 LastName = user.LastName,
@@ -145,6 +145,6 @@ else
     private void CancelEdit()
     {
         editingUserId = null;
-        newUser = new UserCreateDTO();
+        newUser = new CreateUserRequest();
     } 
 }

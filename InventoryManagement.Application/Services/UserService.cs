@@ -1,10 +1,5 @@
 ﻿using InventoryManagement.Domain.Entities;
 using InventoryManagement.Domain.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace InventoryManagement.Application.Services
 {
@@ -17,10 +12,10 @@ namespace InventoryManagement.Application.Services
             _userRepository = userRepository;
         }
 
-        public async Task<IEnumerable<User>> GetAllUsers()
-        {
-            return await _userRepository.GetAllAsync();
-        }
+        //public async Task<IEnumerable<User>> GetAllUsers()
+        //{
+        //    return await _userRepository.GetAllAsync();
+        //}
 
         public async Task<User> GetUserById(string id)
         {
@@ -42,10 +37,10 @@ namespace InventoryManagement.Application.Services
             await _userRepository.DeleteAsync(id);
         }
 
-        public async Task<User> GetUserByEmail(string email) // Добавляем новый метод
-        {
-            return await _userRepository.GetByEmailAsync(email);
-        }
+        //public async Task<User> GetUserByEmail(string email) 
+        //{
+        //    return await _userRepository.GetByEmailAsync(email);
+        //}
     }
 
 }

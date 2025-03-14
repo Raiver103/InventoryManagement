@@ -1,9 +1,6 @@
 ﻿using InventoryManagement.Domain.Entities;
 using InventoryManagement.Domain.Interfaces;
-using System;
-using System.Collections.Generic;
 using System.Security.Claims;
-using System.Threading.Tasks;
 
 namespace InventoryManagement.Application.Services
 {
@@ -22,10 +19,12 @@ namespace InventoryManagement.Application.Services
 
         public async Task SyncUserAsync(ClaimsPrincipal user)
         {
-            if (!user.Identity.IsAuthenticated) return;
+            if (!user.Identity.IsAuthenticated) 
+                return;
 
             var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(userId)) return;
+            if (string.IsNullOrEmpty(userId)) 
+                return;
 
             var email = user.FindFirst(c => c.Type == "nickname")?.Value ?? "Не указано";
             var firstName = user.FindFirst("https://your-app.com/first_name")?.Value ?? "Не указано";
@@ -63,7 +62,7 @@ namespace InventoryManagement.Application.Services
             {
                 var roleId = _auth0Repository.GetRoleId(role);
                 if (string.IsNullOrEmpty(roleId))
-                    throw new Exception("Ошибка: Роль не найдена");
+                    throw new Exception($"Ошибка: Роль {role} не найдена");
 
                 await _accountRepository.AssignRoleAsync(userId, roleId);
             }

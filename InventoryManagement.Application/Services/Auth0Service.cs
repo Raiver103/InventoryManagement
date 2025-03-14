@@ -2,8 +2,6 @@
 using InventoryManagement.Domain.Entities.Auth0;
 using InventoryManagement.Domain.Entities;
 using InventoryManagement.Domain.Interfaces;
-using BCrypt.Net;
-using Microsoft.Extensions.Configuration;
 
 public class Auth0Service
 {
@@ -21,7 +19,7 @@ public class Auth0Service
         return await _auth0Repository.GetAccessTokenAsync();
     }
 
-    public async Task<User> CreateUserAsync(UserCreateDTO request)
+    public async Task<User> CreateUserAsync(CreateUserRequest request)
     {
         var auth0User = await _auth0Repository.CreateUserAsync(request);
 
@@ -45,7 +43,8 @@ public class Auth0Service
         var auth0User = await _auth0Repository.UpdateUserAsync(userId, request);
 
         var user = await _userService.GetUserById(userId);
-        if (user == null) throw new Exception("Пользователь не найден в базе данных");
+        if (user == null) 
+            throw new Exception("Пользователь не найден в базе данных");
 
         user.FirstName = request.FirstName;
         user.LastName = request.LastName;

@@ -49,7 +49,7 @@
 
 //        // Создание нового пользователя
 //        [HttpPost]
-//        public async Task<IActionResult> Create([FromBody] UserCreateDTO userCreateDto)
+//        public async Task<IActionResult> Create([FromBody] CreateUserRequest userCreateDto)
 //        {
 //            if (userCreateDto == null)
 //            {
@@ -71,7 +71,7 @@
 
 //        // Обновление пользователя
 //        [HttpPut("{id}")]
-//        public async Task<IActionResult> Update(string id, [FromBody] UserCreateDTO userUpdateDto)
+//        public async Task<IActionResult> Update(string id, [FromBody] CreateUserRequest userUpdateDto)
 //        {
 //            if (userUpdateDto == null)
 //            {

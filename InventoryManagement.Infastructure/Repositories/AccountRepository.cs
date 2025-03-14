@@ -28,7 +28,8 @@ namespace InventoryManagement.Infrastructure.Repositories
         public async Task<List<string>> GetUserRolesAsync(string userId)
         {
             var accessToken = await _auth0Repository.GetAccessTokenAsync();
-            if (string.IsNullOrEmpty(accessToken)) throw new Exception("Не удалось получить токен");
+            if (string.IsNullOrEmpty(accessToken)) 
+                throw new Exception("Не удалось получить токен");
 
             var rolesUrl = $"https://{_auth0Domain}/api/v2/users/{userId}/roles";
 
@@ -36,9 +37,8 @@ namespace InventoryManagement.Infrastructure.Repositories
             var response = await _httpClient.GetAsync(rolesUrl);
 
             if (!response.IsSuccessStatusCode)
-            {
                 throw new Exception($"Ошибка получения ролей пользователя: {response.StatusCode}, {await response.Content.ReadAsStringAsync()}");
-            }
+            
 
             var responseString = await response.Content.ReadAsStringAsync();
             var roles = JsonConvert.DeserializeObject<List<Auth0Role>>(responseString);
@@ -49,7 +49,8 @@ namespace InventoryManagement.Infrastructure.Repositories
         public async Task AssignRoleAsync(string userId, string roleId)
         {
             var accessToken = await _auth0Repository.GetAccessTokenAsync();
-            if (string.IsNullOrEmpty(accessToken)) throw new Exception("Не удалось получить токен");
+            if (string.IsNullOrEmpty(accessToken)) 
+                throw new Exception("Не удалось получить токен");
 
             var roleAssignUrl = $"https://{_auth0Domain}/api/v2/users/{userId}/roles";
             var roleAssignPayload = new { roles = new List<string> { roleId } };

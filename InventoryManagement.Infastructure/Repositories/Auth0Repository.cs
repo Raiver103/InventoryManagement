@@ -47,7 +47,7 @@ namespace Infrastructure.Repositories
             return tokenResponse != null && tokenResponse.ContainsKey("access_token") ? tokenResponse["access_token"] : throw new Exception("Ответ не содержит access_token");
         }
 
-        public async Task<Auth0UserResponse> CreateUserAsync(UserCreateDTO request)
+        public async Task<Auth0UserResponse> CreateUserAsync(CreateUserRequest request)
         {
             var url = $"https://{_auth0Domain}/api/v2/users";
             var accessToken = await GetAccessTokenAsync();

@@ -30,7 +30,7 @@ public class Auth0Controller : ControllerBase
     }
 
     [HttpPost("create-user")]
-    public async Task<IActionResult> CreateUser([FromBody] UserCreateDTO request)
+    public async Task<IActionResult> CreateUser([FromBody] CreateUserRequest request)
     {
         var user = await _auth0Service.CreateUserAsync(request);
         return Ok(user);
