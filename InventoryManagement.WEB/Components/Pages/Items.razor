@@ -72,16 +72,14 @@ else
             {
                 var existingItem = items.FirstOrDefault(t => t.Id == updatedItem.Id);
                 if (existingItem != null)
-                {
-                    // Обновляем существующую транзакцию
+                { 
                     existingItem.Name = updatedItem.Name;
                     existingItem.LocationId = updatedItem.LocationId;
                     existingItem.Category = updatedItem.Category;
                     existingItem.Quantity = updatedItem.Quantity; 
                 }
                 else
-                {
-                    // Добавляем новую транзакцию
+                { 
                     items.Add(updatedItem);
                 }
 
