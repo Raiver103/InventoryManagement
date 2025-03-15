@@ -4,7 +4,8 @@ using InventoryManagement.Application.Services;
 using InventoryManagement.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
-//using Microsoft.AspNetCore.SignalR;
+using System.Text;
+using ClosedXML.Excel;
 
 namespace InventoryManagement.WEB.Controollers
 {
@@ -14,6 +15,7 @@ namespace InventoryManagement.WEB.Controollers
     {
         private readonly TransactionService _transactionService;
         private readonly ItemService _itemService;
+        private readonly ReportService _reportService;
         private readonly IMapper _mapper;
         private readonly IHubContext<InventoryHub> _hubContext;
 
@@ -21,13 +23,15 @@ namespace InventoryManagement.WEB.Controollers
             TransactionService transactionService, 
             ItemService itemService, 
             IMapper mapper,
-            IHubContext<InventoryHub> hubContext
+            IHubContext<InventoryHub> hubContext,
+            ReportService reportService
             ) 
         {
             _transactionService = transactionService;
             _itemService = itemService;
             _mapper = mapper;
             _hubContext = hubContext;
+            _reportService = reportService;
         }
 
         // Получение всех транзакций
@@ -93,6 +97,26 @@ namespace InventoryManagement.WEB.Controollers
             await _hubContext.Clients.All.SendAsync("ReceiveUpdate", createdTransactionDto);
 
             return CreatedAtAction(nameof(Get), new { id = transaction.Id }, createdTransactionDto);
+        }
+
+        [HttpGet("export/{format}")]
+        public async Task<IActionResult> ExportTransactions(string format)
+        {
+            var transactions = await _transactionService.GetAllTransactions();
+            var transactionsDto = _mapper.Map<IEnumerable<TransactionResponseDTO>>(transactions);
+
+            if (format.ToLower() == "csv")
+            {
+                var csvData = _reportService.GenerateCsv(transactionsDto);
+                return File(Encoding.UTF8.GetBytes(csvData), "text/csv", "transactions.csv");
+            }
+            else if (format.ToLower() == "excel")
+            {
+                var excelFile = _reportService.GenerateExcel(transactionsDto);
+                return File(excelFile, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "transactions.xlsx");
+            }
+
+            return BadRequest("Invalid format. Use 'csv' or 'excel'.");
         }
     }
 }

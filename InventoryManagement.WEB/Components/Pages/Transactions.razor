@@ -3,7 +3,7 @@
 @using Microsoft.AspNetCore.SignalR.Client
 @attribute [Authorize]
 @rendermode InteractiveServer
-
+@inject IJSRuntime JS
 @inject IHttpClientFactory HttpClientFactory
 
 <h3>Транзакции</h3>
@@ -47,6 +47,10 @@ else
     <input type="text" @bind="newTransaction.UserId" placeholder="Пользователь ID" class="form-control mt-2" />
     <input type="datetime-local" @bind="newTransaction.Timestamp" placeholder="Дата" class="form-control mt-2" />
     <button class="btn btn-success mt-2" @onclick="SaveTransaction">Сохранить</button>
+    <h4>Экспорт отчёта</h4>
+    <button class="btn btn-info" @onclick="@(() => ExportReport("csv"))">📄 Скачать CSV</button>
+    <button class="btn btn-success" @onclick="@(() => ExportReport("excel"))">📊 Скачать Excel</button>
+
 }
 
 @code {
@@ -96,6 +100,19 @@ else
         if (hubConnection is not null)
         {
             await hubConnection.DisposeAsync();
+        }
+    }
+
+    private async Task ExportReport(string format)
+    {
+        var client = HttpClientFactory.CreateClient("ApiClient");
+        var response = await client.GetAsync($"api/transaction/export/{format}");
+
+        if (response.IsSuccessStatusCode)
+        {
+            var fileBytes = await response.Content.ReadAsByteArrayAsync();
+            var fileName = format == "csv" ? "transactions.csv" : "transactions.xlsx";
+            await JS.InvokeVoidAsync("saveAsFile", fileName, fileBytes);
         }
     }
 

@@ -68,6 +68,8 @@ builder.Services.AddScoped<Auth0Service>();
 builder.Services.AddScoped<IAccountRepository, AccountRepository>();
 builder.Services.AddScoped<AccountService>();
 
+builder.Services.AddScoped<ReportService>();
+
 builder.Services.AddHttpClient("ApiClient", client =>
 {
     client.BaseAddress = new Uri("https://localhost:7025/"); // Замени на свой API URL
