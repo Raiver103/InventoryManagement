@@ -1,4 +1,5 @@
 ﻿@page "/items"
+@using InventoryManagement.Application.DTOs.Item
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.SignalR.Client
 @attribute [Authorize]
@@ -53,7 +54,7 @@ else
 
 @code {
     private List<ItemResponseDTO> items; // Используем Response DTO для списка товаров
-    private ItemCreateDTO newItem = new ItemCreateDTO(); // Используем Create DTO для нового/редактируемого товара
+    private ItemResponseDTO newItem = new ItemResponseDTO(); // Используем Create DTO для нового/редактируемого товара
     private HubConnection hubConnection;
 
     protected override async Task OnInitializedAsync()
@@ -123,16 +124,16 @@ else
             await client.PutAsJsonAsync($"api/item/{newItem.Id}", newItem);
         }
          
-        newItem = new ItemCreateDTO(); 
+        newItem = new ItemResponseDTO();
         items = await client.GetFromJsonAsync<List<ItemResponseDTO>>("api/item");
     }
 
     private void EditItem(ItemResponseDTO item)
     {
         // При редактировании заполняем форму данными существующего товара
-        newItem = new ItemCreateDTO
+        newItem = new ItemResponseDTO
             {
-                Id = item.Id,
+               // Id = item.Id,
                 Name = item.Name,
                 Category = item.Category,
                 Quantity = item.Quantity,
@@ -149,21 +150,20 @@ else
         items = await client.GetFromJsonAsync<List<ItemResponseDTO>>("api/item");
     }
 
-    private class ItemCreateDTO
-    {
-        public int Id { get; set; }
-        public string Name { get; set; }
-        public string Category { get; set; }
-        public int Quantity { get; set; }
-        public int LocationId { get; set; }
-    }
+    // private class ItemCreateDTO
+    // {
+    //     public string Name { get; set; }
+    //     public string Category { get; set; }
+    //     public int Quantity { get; set; }
+    //     public int LocationId { get; set; }
+    // }
 
-    private class ItemResponseDTO
-    {
-        public int Id { get; set; }
-        public string Name { get; set; }
-        public string Category { get; set; }
-        public int Quantity { get; set; }
-        public int LocationId { get; set; }
-    }
+    // private class ItemResponseDTO
+    // {
+    //     public int Id { get; set; }
+    //     public string Name { get; set; }
+    //     public string Category { get; set; }
+    //     public int Quantity { get; set; }
+    //     public int LocationId { get; set; }
+    // }
 }

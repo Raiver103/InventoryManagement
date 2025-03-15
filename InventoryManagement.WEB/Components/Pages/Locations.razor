@@ -1,4 +1,5 @@
 ﻿@page "/locations"
+@using InventoryManagement.Application.DTOs.Location
 @using Microsoft.AspNetCore.Authorization
 @attribute [Authorize]
 @rendermode InteractiveServer
@@ -46,7 +47,7 @@ else
 
 @code {
     private List<LocationResponseDTO> locations; // Используем Response DTO для списка локаций
-    private LocationCreateDTO newLocation = new LocationCreateDTO(); // Используем Create DTO для нового/редактируемого объекта
+    private LocationResponseDTO newLocation = new LocationResponseDTO(); // Используем Create DTO для нового/редактируемого объекта
 
     protected override async Task OnInitializedAsync()
     {
@@ -70,7 +71,7 @@ else
         }
 
         // Сбросить форму после сохранения
-        newLocation = new LocationCreateDTO();
+        newLocation = new LocationResponseDTO();
         // Обновить список локаций
         locations = await client.GetFromJsonAsync<List<LocationResponseDTO>>("api/location");
     }
@@ -78,7 +79,7 @@ else
     private void EditLocation(LocationResponseDTO location)
     {
         // При редактировании заполняем форму данными существующей локации
-        newLocation = new LocationCreateDTO { Id = location.Id, Name = location.Name, Address = location.Address };
+        newLocation = new LocationResponseDTO { Id = location.Id, Name = location.Name, Address = location.Address };
     }
 
     private async Task DeleteLocation(int id)
@@ -90,17 +91,17 @@ else
         locations = await client.GetFromJsonAsync<List<LocationResponseDTO>>("api/location");
     }
 
-    private class LocationCreateDTO
-    {
-        public int Id { get; set; }
-        public string Name { get; set; }
-        public string Address { get; set; }
-    }
+    // private class LocationCreateDTO
+    // {
+    //     public int Id { get; set; }
+    //     public string Name { get; set; }
+    //     public string Address { get; set; }
+    // }
 
-    private class LocationResponseDTO
-    {
-        public int Id { get; set; }
-        public string Name { get; set; }
-        public string Address { get; set; }
-    }
+    // private class LocationResponseDTO
+    // {
+    //     public int Id { get; set; }
+    //     public string Name { get; set; }
+    //     public string Address { get; set; }
+    // }
 }
