@@ -7,7 +7,8 @@ using InventoryManagement.Infastructure.Identity;
 using InventoryManagement.Infastructure.Persistence;
 using InventoryManagement.Infastructure.Repositories;
 using InventoryManagement.Infrastructure.Repositories;
-using InventoryManagement.WEB.Components; 
+using InventoryManagement.WEB.Components;
+using InventoryManagement.WEB.Controollers;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
@@ -35,9 +36,10 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("Employee", policy => policy.RequireRole("Employee"));
 });
 builder.Services.AddControllersWithViews();
- 
+
 //builder.Services.AddRazorPages();
 //builder.Services.AddServerSideBlazor();
+builder.Services.AddSignalR();
 
 builder.Services.AddAutoMapper(typeof(MappingProfile).Assembly);
 
@@ -85,7 +87,8 @@ if (!app.Environment.IsDevelopment())
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
- 
+
+app.MapHub<InventoryHub>("/inventoryHub");
 
 app.UseHttpsRedirection();
 
@@ -102,7 +105,10 @@ app.MapControllers();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
+
 //app.MapBlazorHub();
+
 app.Run();

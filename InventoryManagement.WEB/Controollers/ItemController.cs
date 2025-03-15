@@ -4,6 +4,7 @@ using InventoryManagement.Application.Services;
 using InventoryManagement.Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 
 namespace InventoryManagement.WEB.Controollers
 {
@@ -13,11 +14,13 @@ namespace InventoryManagement.WEB.Controollers
     {
         private readonly ItemService _itemService;
         private readonly IMapper _mapper;
+        private readonly IHubContext<InventoryHub> _hubContext;
 
-        public ItemController(ItemService itemService, IMapper mapper)
+        public ItemController(ItemService itemService, IMapper mapper, IHubContext<InventoryHub> hubContext)
         {
             _itemService = itemService;
             _mapper = mapper;
+            _hubContext = hubContext;
         }
 
         // Получение всех товаров
@@ -58,6 +61,9 @@ namespace InventoryManagement.WEB.Controollers
 
             // Маппинг созданной сущности обратно в DTO для ответа
             var createdItemDto = _mapper.Map<ItemResponseDTO>(item);
+
+            await _hubContext.Clients.All.SendAsync("ReceiveUpdate", createdItemDto);
+
             return CreatedAtAction(nameof(Get), new { id = item.Id }, createdItemDto);
         }
 
@@ -80,6 +86,9 @@ namespace InventoryManagement.WEB.Controollers
             _mapper.Map(itemUpdateDto, item);
             await _itemService.UpdateItem(item);
 
+            var updatedItemDto = _mapper.Map<ItemResponseDTO>(item);
+            await _hubContext.Clients.All.SendAsync("ReceiveUpdate", updatedItemDto);
+
             return NoContent();
         }
 
@@ -88,6 +97,7 @@ namespace InventoryManagement.WEB.Controollers
         public async Task<IActionResult> Delete(int id)
         {
             await _itemService.DeleteItem(id);
+            await _hubContext.Clients.All.SendAsync("ItemDeleted", id);
             return NoContent();
         }
     }

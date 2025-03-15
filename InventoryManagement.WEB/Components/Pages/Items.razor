@@ -1,5 +1,6 @@
 ﻿@page "/items"
 @using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.SignalR.Client
 @attribute [Authorize]
 @rendermode InteractiveServer
 
@@ -53,31 +54,78 @@ else
 @code {
     private List<ItemResponseDTO> items; // Используем Response DTO для списка товаров
     private ItemCreateDTO newItem = new ItemCreateDTO(); // Используем Create DTO для нового/редактируемого товара
+    private HubConnection hubConnection;
 
     protected override async Task OnInitializedAsync()
     {
         var client = HttpClientFactory.CreateClient("ApiClient");
         // Получаем список товаров с API
         items = await client.GetFromJsonAsync<List<ItemResponseDTO>>("api/item");
+        hubConnection = new HubConnectionBuilder()
+            .WithUrl("https://localhost:7025/inventoryHub")
+            .WithAutomaticReconnect()
+            .Build();
+
+        hubConnection.On<ItemResponseDTO>("ReceiveUpdate", async (updatedItem) =>
+        {
+            await InvokeAsync(() =>
+            {
+                var existingItem = items.FirstOrDefault(t => t.Id == updatedItem.Id);
+                if (existingItem != null)
+                {
+                    // Обновляем существующую транзакцию
+                    existingItem.Name = updatedItem.Name;
+                    existingItem.LocationId = updatedItem.LocationId;
+                    existingItem.Category = updatedItem.Category;
+                    existingItem.Quantity = updatedItem.Quantity; 
+                }
+                else
+                {
+                    // Добавляем новую транзакцию
+                    items.Add(updatedItem);
+                }
+
+                StateHasChanged(); // Обновление UI
+            });
+        });
+        hubConnection.On<int>("ItemDeleted", async (deletedItemId) =>
+        {
+            await InvokeAsync(() =>
+            {
+                var itemToRemove = items.FirstOrDefault(i => i.Id == deletedItemId);
+                if (itemToRemove != null)
+                {
+                    items.Remove(itemToRemove); // Удаляем из списка
+                }
+                StateHasChanged(); // Перерисовываем UI
+            });
+        });
+
+        await hubConnection.StartAsync();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (hubConnection is not null)
+        {
+            await hubConnection.DisposeAsync();
+        }
     }
 
     private async Task SaveItem()
-    {
-        Console.WriteLine("SaveItem вызван"); // Проверка в консоли Blazor
+    { 
         var client = HttpClientFactory.CreateClient("ApiClient");
 
-        if (newItem.Id == 0) // Если Id == 0, значит это новый товар
+        if (newItem.Id == 0)  
         {
             await client.PostAsJsonAsync("api/item", newItem);
         }
-        else // Если Id уже есть, это обновление товара
+        else  
         {
             await client.PutAsJsonAsync($"api/item/{newItem.Id}", newItem);
         }
-
-        // Сбросить форму после сохранения
-        newItem = new ItemCreateDTO();
-        // Обновить список товаров
+         
+        newItem = new ItemCreateDTO(); 
         items = await client.GetFromJsonAsync<List<ItemResponseDTO>>("api/item");
     }
 

@@ -3,6 +3,8 @@ using InventoryManagement.Application.DTOs.Transaction;
 using InventoryManagement.Application.Services;
 using InventoryManagement.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
+//using Microsoft.AspNetCore.SignalR;
 
 namespace InventoryManagement.WEB.Controollers
 {
@@ -13,12 +15,19 @@ namespace InventoryManagement.WEB.Controollers
         private readonly TransactionService _transactionService;
         private readonly ItemService _itemService;
         private readonly IMapper _mapper;
+        private readonly IHubContext<InventoryHub> _hubContext;
 
-        public TransactionController(TransactionService transactionService, ItemService itemService, IMapper mapper)
+        public TransactionController(
+            TransactionService transactionService, 
+            ItemService itemService, 
+            IMapper mapper,
+            IHubContext<InventoryHub> hubContext
+            ) 
         {
             _transactionService = transactionService;
             _itemService = itemService;
             _mapper = mapper;
+            _hubContext = hubContext;
         }
 
         // Получение всех транзакций
@@ -77,8 +86,12 @@ namespace InventoryManagement.WEB.Controollers
             // Добавляем транзакцию
             await _transactionService.AddTransaction(transaction);
 
+
             // Маппинг сущности в ResponseDTO для ответа
             var createdTransactionDto = _mapper.Map<TransactionResponseDTO>(transaction);
+
+            await _hubContext.Clients.All.SendAsync("ReceiveUpdate", createdTransactionDto);
+
             return CreatedAtAction(nameof(Get), new { id = transaction.Id }, createdTransactionDto);
         }
     }

@@ -1,5 +1,6 @@
 ﻿@page "/transactions"
 @using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.SignalR.Client
 @attribute [Authorize]
 @rendermode InteractiveServer
 
@@ -49,29 +50,64 @@ else
 }
 
 @code {
-    private List<TransactionResponseDTO> transactions; // Список транзакций
-    private TransactionCreateDTO newTransaction = new TransactionCreateDTO(); // DTO для создания транзакции
+    private List<TransactionResponseDTO> transactions = new();
+    private TransactionCreateDTO newTransaction = new();
+    private HubConnection hubConnection;
 
     protected override async Task OnInitializedAsync()
     {
-
         var client = HttpClientFactory.CreateClient("ApiClient");
-        // Загружаем все транзакции с API
         transactions = await client.GetFromJsonAsync<List<TransactionResponseDTO>>("api/transaction");
+
+        hubConnection = new HubConnectionBuilder()
+            .WithUrl("https://localhost:7025/inventoryHub")
+            .WithAutomaticReconnect()
+            .Build();
+
+        hubConnection.On<TransactionResponseDTO>("ReceiveUpdate", async (updatedTransaction) =>
+        {
+            await InvokeAsync(() =>
+            {
+                var existingTransaction = transactions.FirstOrDefault(t => t.Id == updatedTransaction.Id);
+                if (existingTransaction != null)
+                {
+                    // Обновляем существующую транзакцию
+                    existingTransaction.ItemId = updatedTransaction.ItemId;
+                    existingTransaction.FromLocationId = updatedTransaction.FromLocationId;
+                    existingTransaction.ToLocationId = updatedTransaction.ToLocationId;
+                    existingTransaction.UserId = updatedTransaction.UserId;
+                    existingTransaction.Timestamp = updatedTransaction.Timestamp;
+                }
+                else
+                {
+                    // Добавляем новую транзакцию
+                    transactions.Add(updatedTransaction);
+                }
+
+                StateHasChanged(); // Обновление UI
+            });
+        });
+
+        await hubConnection.StartAsync();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (hubConnection is not null)
+        {
+            await hubConnection.DisposeAsync();
+        }
     }
 
     private async Task SaveTransaction()
     {
         var client = HttpClientFactory.CreateClient("ApiClient");
+        var response = await client.PostAsJsonAsync("api/transaction", newTransaction);
 
-        // Отправляем запрос на создание транзакции
-        await client.PostAsJsonAsync("api/transaction", newTransaction);
-
-        // Сбросить форму после сохранения
-        newTransaction = new TransactionCreateDTO();
-
-        // Обновить список транзакций
-        transactions = await client.GetFromJsonAsync<List<TransactionResponseDTO>>("api/transaction");
+        if (response.IsSuccessStatusCode)
+        {
+            newTransaction = new TransactionCreateDTO(); // Очистка формы
+        }
     }
 
     private class TransactionCreateDTO

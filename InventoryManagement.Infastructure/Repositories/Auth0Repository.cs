@@ -1,9 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
-using Newtonsoft.Json;
-using System.Net.Http;
-using System.Text;
-using System.Threading.Tasks;
-using System.Collections.Generic;
+using Newtonsoft.Json; 
+using System.Text; 
 using InventoryManagement.Domain.Entities.Auth0;
 using InventoryManagement.Domain.Interfaces;
 using System.Net.Http.Headers;
@@ -34,28 +31,17 @@ namespace Infrastructure.Repositories
                 grant_type = "client_credentials"
             };
 
-            var content = new StringContent(JsonConvert.SerializeObject(payload), Encoding.UTF8, "application/json");
-            var response = await _httpClient.PostAsync(url, content);
-            var responseString = await response.Content.ReadAsStringAsync();
-
-            if (!response.IsSuccessStatusCode)
-            {
-                throw new Exception($"Ошибка получения токена: {response.StatusCode}, {responseString}");
-            }
-
+            var responseString = await SendPostRequestAsync(url, payload);
             var tokenResponse = JsonConvert.DeserializeObject<Dictionary<string, string>>(responseString);
-            return tokenResponse != null && tokenResponse.ContainsKey("access_token")
-                ? tokenResponse["access_token"]
-                : throw new Exception("Ответ не содержит access_token");
+
+            return tokenResponse?.GetValueOrDefault("access_token")
+                ?? throw new Exception("Ответ не содержит access_token");
         }
 
         public async Task<Auth0UserResponse> CreateUserAsync(CreateUserRequest request)
         {
             var url = $"https://{_auth0Domain}/api/v2/users";
             var accessToken = await GetAccessTokenAsync();
-            if (string.IsNullOrEmpty(accessToken))
-                throw new Exception("Не удалось получить токен");
-
             var auth0Payload = new
             {
                 email = request.Email,
@@ -65,15 +51,7 @@ namespace Infrastructure.Repositories
                 app_metadata = new { role = request.Role }
             };
 
-            var content = new StringContent(JsonConvert.SerializeObject(auth0Payload), Encoding.UTF8, "application/json");
-            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-
-            var response = await _httpClient.PostAsync(url, content);
-            var responseString = await response.Content.ReadAsStringAsync();
-
-            if (!response.IsSuccessStatusCode)
-                throw new Exception($"Ошибка создания пользователя в Auth0: {response.StatusCode}, {responseString}");
-
+            var responseString = await SendPostRequestAsync(url, auth0Payload, accessToken);
             var createdUser = JsonConvert.DeserializeObject<Auth0UserResponse>(responseString);
             await AssignRoleToUserAsync(createdUser.Id, request.Role);
 
@@ -84,9 +62,6 @@ namespace Infrastructure.Repositories
         {
             var url = $"https://{_auth0Domain}/api/v2/users/{userId}";
             var accessToken = await GetAccessTokenAsync();
-            if (string.IsNullOrEmpty(accessToken))
-                throw new Exception("Не удалось получить токен");
-
             var updatePayload = new Dictionary<string, object>
             {
                 { "user_metadata", new { first_name = request.FirstName, last_name = request.LastName } },
@@ -98,34 +73,17 @@ namespace Infrastructure.Repositories
                 updatePayload["email"] = request.Email;
             }
 
-            var content = new StringContent(JsonConvert.SerializeObject(updatePayload), Encoding.UTF8, "application/json");
-            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-
-            var response = await _httpClient.PatchAsync(url, content);
-            var responseString = await response.Content.ReadAsStringAsync();
-
-            if (!response.IsSuccessStatusCode)
-                throw new Exception($"Ошибка обновления пользователя в Auth0: {response.StatusCode}, {responseString}");
-
-            var auth0User = JsonConvert.DeserializeObject<Auth0UserResponse>(responseString);
+            var responseString = await SendPatchRequestAsync(url, updatePayload, accessToken);
             await UpdateUserRolesAsync(userId, request.Role);
 
-            return auth0User;
+            return JsonConvert.DeserializeObject<Auth0UserResponse>(responseString);
         }
 
         public async Task<List<Auth0UserResponse>> GetUsersAsync()
         {
             var url = $"https://{_auth0Domain}/api/v2/users";
             var accessToken = await GetAccessTokenAsync();
-            if (string.IsNullOrEmpty(accessToken))
-                throw new Exception("Не удалось получить токен");
-
-            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-            var response = await _httpClient.GetAsync(url);
-            var responseString = await response.Content.ReadAsStringAsync();
-
-            if (!response.IsSuccessStatusCode)
-                throw new Exception($"Ошибка получения пользователей из Auth0: {response.StatusCode}, {responseString}");
+            var responseString = await SendGetRequestAsync(url, accessToken);
 
             return JsonConvert.DeserializeObject<List<Auth0UserResponse>>(responseString);
         }
@@ -134,14 +92,86 @@ namespace Infrastructure.Repositories
         {
             var url = $"https://{_auth0Domain}/api/v2/users/{userId}";
             var accessToken = await GetAccessTokenAsync();
-            if (string.IsNullOrEmpty(accessToken))
-                throw new Exception("Не удалось получить токен");
+            await SendDeleteRequestAsync(url, accessToken);
+        }
 
-            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-            var response = await _httpClient.DeleteAsync(url);
+        private async Task AssignRoleToUserAsync(string userId, string role)
+        {
+            var roleId = GetRoleId(role);
+            if (string.IsNullOrEmpty(roleId))
+                throw new Exception("Ошибка: Указанная роль не найдена");
+
+            var url = $"https://{_auth0Domain}/api/v2/users/{userId}/roles";
+            var payload = new { roles = new List<string> { roleId } };
+            var accessToken = await GetAccessTokenAsync();
+
+            await SendPostRequestAsync(url, payload, accessToken);
+        }
+
+        private async Task UpdateUserRolesAsync(string userId, string newRole)
+        {
+            var newRoleId = GetRoleId(newRole);
+            if (string.IsNullOrEmpty(newRoleId))
+                throw new Exception("Ошибка: Указанная роль не найдена");
+
+            var url = $"https://{_auth0Domain}/api/v2/users/{userId}/roles";
+            var accessToken = await GetAccessTokenAsync();
+            var responseString = await SendGetRequestAsync(url, accessToken);
+
+            var currentRoles = JsonConvert.DeserializeObject<List<Dictionary<string, string>>>(responseString);
+            var currentRoleIds = currentRoles?.ConvertAll(r => r["id"]) ?? new List<string>();
+
+            if (!currentRoleIds.Contains(newRoleId))
+            {
+                if (currentRoleIds.Count > 0)
+                {
+                    await SendDeleteRequestAsync(url, accessToken, new { roles = currentRoleIds });
+                }
+                await SendPostRequestAsync(url, new { roles = new List<string> { newRoleId } }, accessToken);
+            }
+        }
+
+        private async Task<string> SendPostRequestAsync(string url, object payload, string accessToken = null)
+        {
+            return await SendHttpRequestAsync(HttpMethod.Post, url, payload, accessToken);
+        }
+
+        private async Task<string> SendGetRequestAsync(string url, string accessToken)
+        {
+            return await SendHttpRequestAsync(HttpMethod.Get, url, null, accessToken);
+        }
+
+        private async Task<string> SendPatchRequestAsync(string url, object payload, string accessToken)
+        {
+            return await SendHttpRequestAsync(HttpMethod.Patch, url, payload, accessToken);
+        }
+
+        private async Task SendDeleteRequestAsync(string url, string accessToken, object payload = null)
+        {
+            await SendHttpRequestAsync(HttpMethod.Delete, url, payload, accessToken);
+        }
+
+        private async Task<string> SendHttpRequestAsync(HttpMethod method, string url, object payload, string accessToken)
+        {
+            using var request = new HttpRequestMessage(method, url)
+            {
+                Content = payload != null ? new StringContent(JsonConvert.SerializeObject(payload), Encoding.UTF8, "application/json") : null
+            };
+
+            if (!string.IsNullOrEmpty(accessToken))
+            {
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+            }
+
+            var response = await _httpClient.SendAsync(request);
+            var responseString = await response.Content.ReadAsStringAsync();
 
             if (!response.IsSuccessStatusCode)
-                throw new Exception($"Ошибка удаления пользователя в Auth0: {response.StatusCode}, {await response.Content.ReadAsStringAsync()}");
+            {
+                throw new Exception($"Ошибка запроса: {response.StatusCode}, {responseString}");
+            }
+
+            return responseString;
         }
 
         public string GetRoleId(string roleName)
@@ -155,61 +185,5 @@ namespace Infrastructure.Repositories
 
             return roles.ContainsKey(roleName) ? roles[roleName] : null;
         }
-
-        private async Task AssignRoleToUserAsync(string userId, string role)
-        {
-            var roleId = GetRoleId(role);
-            if (string.IsNullOrEmpty(roleId))
-                throw new Exception("Ошибка: Указанная роль не найдена");
-
-            var roleAssignUrl = $"https://{_auth0Domain}/api/v2/users/{userId}/roles";
-            var roleAssignPayload = new { roles = new List<string> { roleId } };
-            var roleContent = new StringContent(JsonConvert.SerializeObject(roleAssignPayload), Encoding.UTF8, "application/json");
-
-            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", await GetAccessTokenAsync());
-            var roleResponse = await _httpClient.PostAsync(roleAssignUrl, roleContent);
-
-            if (!roleResponse.IsSuccessStatusCode)
-                throw new Exception($"Ошибка назначения роли: {roleResponse.StatusCode}, {await roleResponse.Content.ReadAsStringAsync()}");
-        }
-
-        private async Task UpdateUserRolesAsync(string userId, string newRole)
-        {
-            var newRoleId = GetRoleId(newRole);
-            if (string.IsNullOrEmpty(newRoleId))
-                throw new Exception("Ошибка: Указанная роль не найдена");
-
-            var rolesUrl = $"https://{_auth0Domain}/api/v2/users/{userId}/roles";
-            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", await GetAccessTokenAsync());
-
-            var rolesResponse = await _httpClient.GetAsync(rolesUrl);
-            var rolesResponseString = await rolesResponse.Content.ReadAsStringAsync();
-
-            if (!rolesResponse.IsSuccessStatusCode)
-                throw new Exception($"Ошибка получения текущих ролей пользователя: {rolesResponse.StatusCode}, {rolesResponseString}");
-
-            var currentRoles = JsonConvert.DeserializeObject<List<Dictionary<string, string>>>(rolesResponseString);
-            var currentRoleIds = currentRoles?.Select(r => r["id"]).ToList() ?? new List<string>();
-
-            if (!currentRoleIds.Contains(newRoleId))
-            {
-                if (currentRoleIds.Any())
-                {
-                    var removeRolesPayload = new { roles = currentRoleIds };
-                    var removeRolesContent = new StringContent(JsonConvert.SerializeObject(removeRolesPayload), Encoding.UTF8, "application/json");
-                    var removeRolesResponse = await _httpClient.SendAsync(new HttpRequestMessage(HttpMethod.Delete, rolesUrl) { Content = removeRolesContent });
-
-                    if (!removeRolesResponse.IsSuccessStatusCode)
-                        throw new Exception($"Ошибка удаления старых ролей: {removeRolesResponse.StatusCode}, {await removeRolesResponse.Content.ReadAsStringAsync()}");
-                }
-
-                var addRolesPayload = new { roles = new List<string> { newRoleId } };
-                var addRolesContent = new StringContent(JsonConvert.SerializeObject(addRolesPayload), Encoding.UTF8, "application/json");
-                var addRolesResponse = await _httpClient.PostAsync(rolesUrl, addRolesContent);
-
-                if (!addRolesResponse.IsSuccessStatusCode)
-                    throw new Exception($"Ошибка назначения новой роли: {addRolesResponse.StatusCode}, {await addRolesResponse.Content.ReadAsStringAsync()}");
-            }
-        }
-    } 
+    }
 }

@@ -1,13 +1,9 @@
 ﻿using InventoryManagement.Domain.Interfaces;
 using InventoryManagement.Infastructure.Models.Auth0;
 using Microsoft.Extensions.Configuration;
-using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Net.Http;
+using Newtonsoft.Json; 
 using System.Net.Http.Headers;
-using System.Text;
-using System.Threading.Tasks;
+using System.Text; 
 
 namespace InventoryManagement.Infrastructure.Repositories
 {
