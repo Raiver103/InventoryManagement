@@ -31,23 +31,24 @@ namespace InventoryManagement.Application.Services
 
         public async Task AddTransaction(Transaction transaction)
         {
-            await _transactionRepository.AddAsync(transaction);
-
             var item = await _itemRepository.GetByIdAsync(transaction.ItemId);
             if (item == null)
             {
-                throw new Exception("Item not found.");
+                throw new Exception("Item not found."); 
             }
 
-            item.LocationId = transaction.ToLocationId; 
-            await _itemRepository.UpdateAsync(item); 
+            item.LocationId = transaction.ToLocationId;
+            await _itemRepository.UpdateAsync(item);
 
             var fromLocation = await _locationRepository.GetByIdAsync(transaction.FromLocationId);
             var toLocation = await _locationRepository.GetByIdAsync(transaction.ToLocationId);
             if (fromLocation == null || toLocation == null)
             {
-                throw new Exception("Location not found.");
+                throw new Exception("Location not found."); 
             }
+
+            await _transactionRepository.AddAsync(transaction);
         }
+
     }
 }

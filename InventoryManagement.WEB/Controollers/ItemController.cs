@@ -2,8 +2,7 @@
 using InventoryManagement.Application.DTOs.Item;
 using InventoryManagement.Application.Services;
 using InventoryManagement.Domain.Entities;
-using InventoryManagement.Infastructure.Hubs;
-using Microsoft.AspNetCore.Authorization;
+using InventoryManagement.Infastructure.Hubs; 
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 
@@ -34,8 +33,7 @@ namespace InventoryManagement.WEB.Controollers
         }
 
         // Получение товара по ID
-        [HttpGet("{id}")]
-        [Authorize(Policy = "Admin")]
+        [HttpGet("{id}")] 
         public async Task<IActionResult> Get(int id)
         {
             var item = await _itemService.GetItemById(id);

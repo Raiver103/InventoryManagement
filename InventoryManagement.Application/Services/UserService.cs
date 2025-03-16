@@ -1,9 +1,10 @@
-﻿using InventoryManagement.Domain.Entities;
+﻿using InventoryManagement.Application.Interfaces;
+using InventoryManagement.Domain.Entities;
 using InventoryManagement.Domain.Interfaces;
 
 namespace InventoryManagement.Application.Services
 {
-    public class UserService
+    public class UserService : IUserService
     {
         private readonly IUserRepository _userRepository;
 
@@ -17,12 +18,12 @@ namespace InventoryManagement.Application.Services
         //    return await _userRepository.GetAllAsync();
         //}
 
-        public async Task<User> GetUserById(string id)
+        public virtual async Task<User> GetUserById(string id)
         {
             return await _userRepository.GetByIdAsync(id);
         }
 
-        public async Task AddUser(User user)
+        public virtual async Task AddUser(User user)
         {
             await _userRepository.AddAsync(user);
         }

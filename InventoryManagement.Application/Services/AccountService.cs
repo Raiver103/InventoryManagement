@@ -1,4 +1,5 @@
-﻿using InventoryManagement.Domain.Entities;
+﻿using InventoryManagement.Application.Interfaces;
+using InventoryManagement.Domain.Entities;
 using InventoryManagement.Domain.Interfaces;
 using System.Security.Claims;
 
@@ -8,9 +9,9 @@ namespace InventoryManagement.Application.Services
     {
         private readonly IAccountRepository _accountRepository;
         private readonly IAuth0Repository _auth0Repository;
-        private readonly UserService _userService;
+        private readonly IUserService _userService;
 
-        public AccountService(IAccountRepository accountRepository, IAuth0Repository auth0Repository, UserService userService)
+        public AccountService(IAccountRepository accountRepository, IAuth0Repository auth0Repository, IUserService userService)
         {
             _accountRepository = accountRepository;
             _auth0Repository = auth0Repository;
