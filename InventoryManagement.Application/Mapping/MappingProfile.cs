@@ -12,7 +12,6 @@ namespace InventoryManagement.Application.Mapping
     {
         public MappingProfile()
         {
-            // Конфигурируем маппинг для всех сущностей и их DTO
             CreateMap<User, CreateUserRequest>().ReverseMap();
             CreateMap<User, UserResponseDTO>().ReverseMap(); 
 

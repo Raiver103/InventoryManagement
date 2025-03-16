@@ -76,7 +76,6 @@ else
                 var existingTransaction = transactions.FirstOrDefault(t => t.Id == updatedTransaction.Id);
                 if (existingTransaction != null)
                 {
-                    // Обновляем существующую транзакцию
                     existingTransaction.ItemId = updatedTransaction.ItemId;
                     existingTransaction.FromLocationId = updatedTransaction.FromLocationId;
                     existingTransaction.ToLocationId = updatedTransaction.ToLocationId;
@@ -85,11 +84,10 @@ else
                 }
                 else
                 {
-                    // Добавляем новую транзакцию
                     transactions.Add(updatedTransaction);
                 }
 
-                StateHasChanged(); // Обновление UI
+                StateHasChanged(); 
             });
         });
 
@@ -124,26 +122,7 @@ else
 
         if (response.IsSuccessStatusCode)
         {
-            newTransaction = new TransactionResponseDTO(); // Очистка формы
+            newTransaction = new TransactionResponseDTO(); 
         }
     }
-
-    // private class TransactionCreateDTO
-    // {
-    //     public int ItemId { get; set; }
-    //     public int FromLocationId { get; set; }
-    //     public int ToLocationId { get; set; }
-    //     public string UserId { get; set; }
-    //     public DateTime Timestamp { get; set; }
-    // }
-
-    // private class TransactionResponseDTO
-    // {
-    //     public int Id { get; set; }
-    //     public int ItemId { get; set; }
-    //     public int FromLocationId { get; set; }
-    //     public int ToLocationId { get; set; }
-    //     public string UserId { get; set; }
-    //     public DateTime Timestamp { get; set; }
-    // }
 }

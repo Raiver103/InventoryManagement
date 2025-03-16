@@ -3,6 +3,7 @@ using Infrastructure.Repositories;
 using InventoryManagement.Application.Mapping;
 using InventoryManagement.Application.Services;
 using InventoryManagement.Domain.Interfaces;
+using InventoryManagement.Infastructure.Hubs;
 using InventoryManagement.Infastructure.Identity;
 using InventoryManagement.Infastructure.Persistence;
 using InventoryManagement.Infastructure.Repositories;
@@ -48,7 +49,6 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 builder.Services.AddSingleton<IClaimsTransformation, ClaimsTransformation>();
 
-builder.Services.AddHttpClient<Auth0Service>();
 
 builder.Services.AddScoped<IItemRepository, ItemRepository>();
 builder.Services.AddScoped<ItemService>();
@@ -69,6 +69,7 @@ builder.Services.AddScoped<IAccountRepository, AccountRepository>();
 builder.Services.AddScoped<AccountService>();
 
 builder.Services.AddScoped<ReportService>();
+builder.Services.AddHttpClient<Auth0Service>();
 
 builder.Services.AddHttpClient("ApiClient", client =>
 {

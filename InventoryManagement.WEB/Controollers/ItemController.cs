@@ -2,6 +2,7 @@
 using InventoryManagement.Application.DTOs.Item;
 using InventoryManagement.Application.Services;
 using InventoryManagement.Domain.Entities;
+using InventoryManagement.Infastructure.Hubs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;

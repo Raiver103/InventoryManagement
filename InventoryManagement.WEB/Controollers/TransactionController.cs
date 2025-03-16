@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using System.Text;
 using ClosedXML.Excel;
+using InventoryManagement.Infastructure.Hubs;
 
 namespace InventoryManagement.WEB.Controollers
 {
