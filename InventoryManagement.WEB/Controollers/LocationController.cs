@@ -31,7 +31,6 @@ namespace InventoryManagement.WEB.Controollers
 
         // Получение локации по ID
         [HttpGet("{id}")]
-        [Authorize(Policy = "Employee")]
         public async Task<IActionResult> Get(int id)
         {
             var location = await _locationService.GetLocationById(id);

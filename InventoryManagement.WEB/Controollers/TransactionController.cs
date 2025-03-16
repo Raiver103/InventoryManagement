@@ -40,7 +40,7 @@ namespace InventoryManagement.WEB.Controollers
         public async Task<IActionResult> GetAll()
         {
             var transactions = await _transactionService.GetAllTransactions();
-            var transactionsDto = _mapper.Map<IEnumerable<TransactionResponseDTO>>(transactions);
+            var transactionsDto = _mapper.Map<IEnumerable<TransactionResponseDTO>>(transactions); 
             return Ok(transactionsDto);
         }
 

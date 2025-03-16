@@ -1,22 +1,27 @@
-﻿using InventoryManagement.Domain.Entities;
+﻿using InventoryManagement.Application.DTOs.Location;
+using InventoryManagement.Domain.Entities;
 using InventoryManagement.Infastructure.Persistence;
 using InventoryManagement.WEB;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
-using System.Net.Http.Json;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net;
+using System.Net.Http.Json;
+using System.Threading.Tasks;
+using Xunit;
 
 namespace InventoryManagement.Tests.Tests.Controllers
 {
     [Collection("Sequential")]
-    public class ItemControllerTests : IClassFixture<WebApplicationFactory<Program>>
+    public class LocationControllerTests : IClassFixture<WebApplicationFactory<Program>>
     {
         private readonly HttpClient _client;
         private readonly WebApplicationFactory<Program> _factory;
 
-        public ItemControllerTests(WebApplicationFactory<Program> factory)
+        public LocationControllerTests(WebApplicationFactory<Program> factory)
         {
             _factory = factory.WithWebHostBuilder(builder =>
             {
@@ -56,87 +61,114 @@ namespace InventoryManagement.Tests.Tests.Controllers
         {
             context.Database.EnsureDeleted(); // Удаляем предыдущую БД, если есть
             context.Database.EnsureCreated();
-
-            context.Items.AddRange(
-                new Item { Id = 1, Name = "Test Item 1", Quantity = 10, Category = "Test Category 1" },
-                new Item { Id = 2, Name = "Test Item 2", Quantity = 20, Category = "Test Category 2" }
+            context.Locations.AddRange(
+                new Location { Id = 1, Name = "Warehouse A", Address = "123 Main St" },
+                new Location { Id = 2, Name = "Warehouse B", Address = "456 Side St" }
             );
             context.SaveChanges();
         }
 
         [Fact]
-        public async Task GetAllItems_ShouldReturnAllItems()
+        public async Task GetAllLocations_ShouldReturnAllLocations()
         {
             // Act
-            var response = await _client.GetAsync("/api/item");
+            var response = await _client.GetAsync("/api/location");
 
             // Assert
             response.EnsureSuccessStatusCode();
             var content = await response.Content.ReadAsStringAsync();
-            var items = JsonConvert.DeserializeObject<IEnumerable<Item>>(content);
-            Assert.Equal(2, items.Count());
+            var locations = JsonConvert.DeserializeObject<IEnumerable<Location>>(content);
+
+            Assert.Equal(2, locations.Count());
         }
 
         [Fact]
-        public async Task GetItemById_ShouldReturnItem_WhenItemExists()
+        public async Task GetLocationById_ShouldReturnLocation_WhenExists()
         {
             // Act
-            var response = await _client.GetAsync("/api/item/1");
-
-            // Проверяем статус ответа
-            response.EnsureSuccessStatusCode();
-            var content = await response.Content.ReadAsStringAsync();
-
-            // Логирование ответа для отладки
-            Console.WriteLine($"Response content: {content}");
-
-            // Десериализация JSON
-            var item = JsonConvert.DeserializeObject<Item>(content);
+            var response = await _client.GetAsync("/api/location/1");
 
             // Assert
-            Assert.NotNull(item);
-            Assert.Equal(1, item.Id);
+            response.EnsureSuccessStatusCode();
+            var content = await response.Content.ReadAsStringAsync();
+            var location = JsonConvert.DeserializeObject<Location>(content);
+
+            Assert.NotNull(location);
+            Assert.Equal(1, location.Id);
         }
+
         [Fact]
-        public async Task CreateItem_ShouldReturnCreatedItem()
+        public async Task GetLocationById_ShouldReturnNotFound_WhenNotExists()
+        {
+            // Act
+            var response = await _client.GetAsync("/api/location/999");
+
+            // Assert
+            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        }
+
+        [Fact]
+        public async Task CreateLocation_ShouldReturnCreatedLocation()
         {
             // Arrange
-            var newItem = new { Name = "New Item", Quantity = 5, Category = "Test Category" };
+            var newLocation = new { Name = "New Warehouse", Address = "789 Another St" };
 
             // Act
-            var response = await _client.PostAsJsonAsync("/api/item", newItem);
+            var response = await _client.PostAsJsonAsync("/api/location", newLocation);
 
             // Assert
             response.EnsureSuccessStatusCode();
             var content = await response.Content.ReadAsStringAsync();
-            var createdItem = JsonConvert.DeserializeObject<Item>(content);
+            var createdLocation = JsonConvert.DeserializeObject<Location>(content);
 
-            Assert.NotNull(createdItem);
-            Assert.Equal("New Item", createdItem.Name);
+            Assert.NotNull(createdLocation);
+            Assert.Equal("New Warehouse", createdLocation.Name);
         }
 
         [Fact]
-        public async Task UpdateItem_ShouldReturnNoContent()
+        public async Task UpdateLocation_ShouldReturnNoContent()
         {
             // Arrange
-            var updatedItem = new { Name = "Updated Item", Quantity = 99, Category = "Updated Category" };
+            var updatedLocation = new { Name = "Updated Warehouse", Address = "Updated Address" };
 
             // Act
-            var response = await _client.PutAsJsonAsync("/api/item/1", updatedItem);
+            var response = await _client.PutAsJsonAsync("/api/location/1", updatedLocation);
 
             // Assert
             Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
         }
 
         [Fact]
-        public async Task DeleteItem_ShouldReturnNoContent()
+        public async Task UpdateLocation_ShouldReturnNotFound_WhenLocationDoesNotExist()
+        {
+            // Arrange
+            var updatedLocation = new { Name = "Nonexistent Warehouse", Address = "Nowhere" };
+
+            // Act
+            var response = await _client.PutAsJsonAsync("/api/locations/999", updatedLocation);
+
+            // Assert
+            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        }
+
+        [Fact]
+        public async Task DeleteLocation_ShouldReturnNoContent_WhenExists()
         {
             // Act
-            var response = await _client.DeleteAsync("/api/item/1");
+            var response = await _client.DeleteAsync("/api/location/1");
 
             // Assert
             Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
         }
 
+        [Fact]
+        public async Task DeleteLocation_ShouldReturnNotFound_WhenNotExists()
+        {
+            // Act
+            var response = await _client.DeleteAsync("/api/locations/999");
+
+            // Assert
+            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        }
     }
 }
