@@ -1,9 +1,10 @@
-﻿using InventoryManagement.Domain.Entities;
+﻿using InventoryManagement.Application.Interfaces;
+using InventoryManagement.Domain.Entities;
 using InventoryManagement.Domain.Interfaces;
 
 namespace InventoryManagement.Application.Services
 {
-    public class TransactionService
+    public class TransactionService : ITransactionService
     {
         private readonly ITransactionRepository _transactionRepository;
         private readonly IItemRepository _itemRepository;

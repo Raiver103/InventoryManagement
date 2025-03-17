@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using InventoryManagement.Application.DTOs.Location;
+using InventoryManagement.Application.Interfaces;
 using InventoryManagement.Application.Services;
 using InventoryManagement.Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
@@ -11,10 +12,10 @@ namespace InventoryManagement.WEB.Controollers
     [Route("api/[controller]")]
     public class LocationController : ControllerBase
     {
-        private readonly LocationService _locationService;
+        private readonly ILocationService _locationService;
         private readonly IMapper _mapper;
 
-        public LocationController(LocationService locationService, IMapper mapper)
+        public LocationController(ILocationService locationService, IMapper mapper)
         {
             _locationService = locationService;
             _mapper = mapper;
@@ -24,7 +25,7 @@ namespace InventoryManagement.WEB.Controollers
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var locations = await _locationService.GetAllLocation();
+            var locations = await _locationService.GetAllLocations();
             var locationDtos = _mapper.Map<IEnumerable<LocationResponseDTO>>(locations);
             return Ok(locationDtos);
         }

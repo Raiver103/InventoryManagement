@@ -1,5 +1,6 @@
 ﻿using ClosedXML.Excel;
 using InventoryManagement.Application.DTOs.Transaction;
+using InventoryManagement.Application.Interfaces;
 using InventoryManagement.Application.Services;
 using System;
 using System.Collections.Generic;
@@ -11,7 +12,7 @@ namespace InventoryManagement.Tests.UnitTests.Services
 {
     public class ReportServiceTests
     {
-        private readonly ReportService _reportService;
+        private readonly IReportService _reportService;
 
         public ReportServiceTests()
         {

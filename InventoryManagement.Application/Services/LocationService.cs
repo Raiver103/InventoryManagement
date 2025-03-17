@@ -1,9 +1,10 @@
-﻿using InventoryManagement.Domain.Entities;
+﻿using InventoryManagement.Application.Interfaces;
+using InventoryManagement.Domain.Entities;
 using InventoryManagement.Domain.Interfaces;
 
 namespace InventoryManagement.Application.Services
 {
-    public class LocationService
+    public class LocationService : ILocationService
     {
         private readonly ILocationRepository _locationRepository;
 
@@ -12,7 +13,7 @@ namespace InventoryManagement.Application.Services
             _locationRepository = locationRepository;
         }
 
-        public async Task<IEnumerable<Location>> GetAllLocation()
+        public async Task<IEnumerable<Location>> GetAllLocations()
         {
             return await _locationRepository.GetAllAsync();
         }
@@ -35,6 +36,6 @@ namespace InventoryManagement.Application.Services
         public async Task DeleteLocation(int id)
         {
             await _locationRepository.DeleteAsync(id);
-        }
+        } 
     }
 }

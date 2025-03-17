@@ -61,16 +61,16 @@ namespace InventoryManagement.WEB {
             builder.Services.AddHttpClient<Auth0Service>();
 
             builder.Services.AddScoped<IItemRepository, ItemRepository>();
-            builder.Services.AddScoped<ItemService>();
+            builder.Services.AddScoped<IItemService, ItemService>();
 
             builder.Services.AddScoped<IUserRepository, UserRepository>();
             builder.Services.AddScoped<IUserService, UserService>();
 
             builder.Services.AddScoped<ILocationRepository, LocationRepository>();
-            builder.Services.AddScoped<LocationService>();
+            builder.Services.AddScoped<ILocationService, LocationService>();
 
             builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
-            builder.Services.AddScoped<TransactionService>();
+            builder.Services.AddScoped<ITransactionService, TransactionService>();
 
             builder.Services.AddScoped<IAuth0Repository, Auth0Repository>();
             builder.Services.AddScoped<IAuth0Service, Auth0Service>();
@@ -78,7 +78,7 @@ namespace InventoryManagement.WEB {
             builder.Services.AddScoped<IAccountRepository, AccountRepository>();
             builder.Services.AddScoped<IAccountService, AccountService>();
 
-            builder.Services.AddScoped<ReportService>();
+            builder.Services.AddScoped<IReportService, ReportService>();
 
             builder.Services.AddHttpClient("ApiClient", client =>
             {

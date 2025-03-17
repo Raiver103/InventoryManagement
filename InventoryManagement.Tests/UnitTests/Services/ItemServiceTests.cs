@@ -1,4 +1,5 @@
 ﻿using FluentAssertions;
+using InventoryManagement.Application.Interfaces;
 using InventoryManagement.Application.Services;
 using InventoryManagement.Domain.Entities;
 using InventoryManagement.Domain.Interfaces;
@@ -14,7 +15,7 @@ namespace InventoryManagement.Tests.UnitTests.Services
     public class ItemServiceTests
     {
         private readonly Mock<IItemRepository> _itemRepositoryMock;
-        private readonly ItemService _itemService;
+        private readonly IItemService _itemService;
 
         public ItemServiceTests()
         {

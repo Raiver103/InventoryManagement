@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using InventoryManagement.Application.DTOs.Item;
+using InventoryManagement.Application.Interfaces;
 using InventoryManagement.Application.Services;
 using InventoryManagement.Domain.Entities;
 using InventoryManagement.Infastructure.Hubs; 
@@ -12,11 +13,11 @@ namespace InventoryManagement.WEB.Controollers
     [Route("api/[controller]")]
     public class ItemController : ControllerBase
     {
-        private readonly ItemService _itemService;
+        private readonly IItemService _itemService;
         private readonly IMapper _mapper;
         private readonly IHubContext<InventoryHub> _hubContext;
 
-        public ItemController(ItemService itemService, IMapper mapper, IHubContext<InventoryHub> hubContext)
+        public ItemController(IItemService itemService, IMapper mapper, IHubContext<InventoryHub> hubContext)
         {
             _itemService = itemService;
             _mapper = mapper;

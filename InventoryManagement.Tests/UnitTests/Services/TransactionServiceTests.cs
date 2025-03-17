@@ -1,4 +1,5 @@
 ﻿using FluentAssertions;
+using InventoryManagement.Application.Interfaces;
 using InventoryManagement.Application.Services;
 using InventoryManagement.Domain.Entities;
 using InventoryManagement.Domain.Interfaces;
@@ -16,7 +17,7 @@ namespace InventoryManagement.Tests.UnitTests.Services
         private readonly Mock<ITransactionRepository> _transactionRepositoryMock;
         private readonly Mock<IItemRepository> _itemRepositoryMock;
         private readonly Mock<ILocationRepository> _locationRepositoryMock;
-        private readonly TransactionService _transactionService;
+        private readonly ITransactionService _transactionService;
 
         public TransactionServiceTests()
         {
@@ -35,10 +36,10 @@ namespace InventoryManagement.Tests.UnitTests.Services
         {
             // Arrange
             var transactions = new List<Transaction>
-        {
-            new Transaction { Id = 1, ItemId = 10, FromLocationId = 1, ToLocationId = 2, UserId = "user1" },
-            new Transaction { Id = 2, ItemId = 11, FromLocationId = 2, ToLocationId = 3, UserId = "user2" }
-        };
+            {
+                new Transaction { Id = 1, ItemId = 10, FromLocationId = 1, ToLocationId = 2, UserId = "user1" },
+                new Transaction { Id = 2, ItemId = 11, FromLocationId = 2, ToLocationId = 3, UserId = "user2" }
+            };
 
             _transactionRepositoryMock.Setup(repo => repo.GetAllAsync())
                 .ReturnsAsync(transactions);

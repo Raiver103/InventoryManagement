@@ -1,4 +1,5 @@
 ﻿using FluentAssertions;
+using InventoryManagement.Application.Interfaces;
 using InventoryManagement.Application.Services;
 using InventoryManagement.Domain.Entities;
 using InventoryManagement.Domain.Interfaces;
@@ -14,7 +15,7 @@ namespace InventoryManagement.Tests.UnitTests.Services
     public class LocationServiceTests
     {
         private readonly Mock<ILocationRepository> _locationRepositoryMock;
-        private readonly LocationService _locationService;
+        private readonly ILocationService _locationService;
 
         public LocationServiceTests()
         {
@@ -36,7 +37,7 @@ namespace InventoryManagement.Tests.UnitTests.Services
                 .ReturnsAsync(locations);
 
             // Act
-            var result = await _locationService.GetAllLocation();
+            var result = await _locationService.GetAllLocations();
 
             // Assert
             result.Should().NotBeNull();

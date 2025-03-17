@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.SignalR;
 using System.Text;
 using ClosedXML.Excel;
 using InventoryManagement.Infastructure.Hubs;
+using InventoryManagement.Application.Interfaces;
 
 namespace InventoryManagement.WEB.Controollers
 {
@@ -14,18 +15,18 @@ namespace InventoryManagement.WEB.Controollers
     [Route("api/[controller]")]
     public class TransactionController : ControllerBase
     {
-        private readonly TransactionService _transactionService;
-        private readonly ItemService _itemService;
-        private readonly ReportService _reportService;
+        private readonly ITransactionService _transactionService;
+        private readonly IItemService _itemService;
+        private readonly IReportService _reportService;
         private readonly IMapper _mapper;
         private readonly IHubContext<InventoryHub> _hubContext;
 
         public TransactionController(
-            TransactionService transactionService, 
-            ItemService itemService, 
+            ITransactionService transactionService, 
+            IItemService itemService, 
             IMapper mapper,
             IHubContext<InventoryHub> hubContext,
-            ReportService reportService
+            IReportService reportService
             ) 
         {
             _transactionService = transactionService;

@@ -1,11 +1,12 @@
 ﻿using ClosedXML.Excel;
 using InventoryManagement.Application.DTOs.Transaction;
+using InventoryManagement.Application.Interfaces;
 using System.Globalization;
 using System.Text;
 
 namespace InventoryManagement.Application.Services
 {
-    public class ReportService
+    public class ReportService : IReportService
     {
         public string GenerateCsv(IEnumerable<TransactionResponseDTO> transactions)
         {
