@@ -1,5 +1,4 @@
-﻿using InventoryManagement.Application.Services;
-using InventoryManagement.Domain.Entities.Auth0;
+﻿using InventoryManagement.Domain.Entities.Auth0;
 using InventoryManagement.Domain.Entities;
 using InventoryManagement.Domain.Interfaces;
 using InventoryManagement.Application.Interfaces;
