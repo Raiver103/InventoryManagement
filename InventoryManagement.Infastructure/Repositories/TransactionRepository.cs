@@ -9,8 +9,8 @@ namespace InventoryManagement.Infastructure.Repositories
     {
         private readonly AppDbContext _context;
 
-        public TransactionRepository(AppDbContext context) 
-        { 
+        public TransactionRepository(AppDbContext context)
+        {
             _context = context;
         }
 
@@ -22,12 +22,22 @@ namespace InventoryManagement.Infastructure.Repositories
 
         public async Task<IEnumerable<Transaction>> GetAllAsync()
         {
-            return await _context.Transactions.ToListAsync();
+            return await _context.Transactions
+                .Include(t => t.Item)
+                .Include(t => t.FromLocation)
+                .Include(t => t.ToLocation)
+                .Include(t => t.User)
+                .ToListAsync();
         }
 
         public async Task<Transaction> GetByIdAsync(int id)
         {
-            return await _context.Transactions.FindAsync(id);
+            return await _context.Transactions
+                .Include(t => t.Item)
+                .Include(t => t.FromLocation)
+                .Include(t => t.ToLocation)
+                .Include(t => t.User)
+                .FirstOrDefaultAsync(t => t.Id == id);
         }
     }
 }

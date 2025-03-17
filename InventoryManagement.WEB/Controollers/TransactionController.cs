@@ -14,84 +14,62 @@ namespace InventoryManagement.WEB.Controollers
     public class TransactionController : ControllerBase
     {
         private readonly ITransactionService _transactionService;
-        private readonly IItemService _itemService;
-        //private readonly IReportService _reportService;
         private readonly IMapper _mapper;
         private readonly IHubContext<InventoryHub> _hubContext;
 
         public TransactionController(
-            ITransactionService transactionService, 
-            IItemService itemService, 
+            ITransactionService transactionService,
             IMapper mapper,
-            IHubContext<InventoryHub> hubContext 
-            ) 
+            IHubContext<InventoryHub> hubContext
+        )
         {
             _transactionService = transactionService;
-            _itemService = itemService;
             _mapper = mapper;
-            _hubContext = hubContext; 
+            _hubContext = hubContext;
         }
 
-        // Получение всех транзакций
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
             var transactions = await _transactionService.GetAllTransactions();
-            var transactionsDto = _mapper.Map<IEnumerable<TransactionResponseDTO>>(transactions); 
-            return Ok(transactionsDto);
+            return Ok(_mapper.Map<IEnumerable<TransactionResponseDTO>>(transactions));
         }
 
-        // Получение транзакции по ID
         [HttpGet("{id}")]
         public async Task<IActionResult> Get(int id)
         {
             var transaction = await _transactionService.GetTransactionById(id);
             if (transaction == null)
-            {
                 return NotFound();
-            }
-            var transactionDto = _mapper.Map<TransactionResponseDTO>(transaction);
-            return Ok(transactionDto);
+
+            return Ok(_mapper.Map<TransactionResponseDTO>(transaction));
         }
 
-        // Создание транзакции
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] TransactionCreateDTO transactionCreateDto)
         {
             if (transactionCreateDto == null)
-            {
                 return BadRequest("Transaction data is required.");
-            }
 
-            if (transactionCreateDto.FromLocationId == transactionCreateDto.ToLocationId)
+            try
             {
-                return BadRequest("Item cannot be moved to the same location.");
-            }
+                var createdTransaction = await _transactionService.AddTransaction(transactionCreateDto);
+                var createdTransactionDto = _mapper.Map<TransactionResponseDTO>(createdTransaction);
 
-            var item = await _itemService.GetItemById(transactionCreateDto.ItemId);
-            if (item == null)
+                await _hubContext.Clients.All.SendAsync("ReceiveUpdate", createdTransactionDto);
+                return CreatedAtAction(nameof(Get), new { id = createdTransaction.Id }, createdTransactionDto);
+            }
+            catch (ArgumentException ex)  // ❗ Обрабатываем ошибки валидации
             {
-                return NotFound("Item not found.");
+                return BadRequest(new { error = ex.Message });
             }
-
-            if (item.LocationId != transactionCreateDto.FromLocationId)
+            catch (Exception ex)
             {
-                return BadRequest("Item's current location does not match FromLocationId.");
+                return StatusCode(500, new { error = "Internal Server Error", details = ex.Message });
             }
-
-            // Маппинг CreateDTO в сущность
-            var transaction = _mapper.Map<Transaction>(transactionCreateDto);
-
-            // Добавляем транзакцию
-            await _transactionService.AddTransaction(transaction);
+        }
 
 
-            // Маппинг сущности в ResponseDTO для ответа
-            var createdTransactionDto = _mapper.Map<TransactionResponseDTO>(transaction);
 
-            await _hubContext.Clients.All.SendAsync("ReceiveUpdate", createdTransactionDto);
-
-            return CreatedAtAction(nameof(Get), new { id = transaction.Id }, createdTransactionDto);
-        } 
     }
 }

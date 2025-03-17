@@ -1,4 +1,5 @@
 ﻿using FluentAssertions;
+using InventoryManagement.Application.DTOs.Transaction;
 using InventoryManagement.Application.Interfaces;
 using InventoryManagement.Application.Services;
 using InventoryManagement.Domain.Entities;
@@ -84,56 +85,83 @@ namespace InventoryManagement.Tests.UnitTests.Services
         public async Task AddTransaction_ShouldUpdateItemLocation()
         {
             // Arrange
-            var transaction = new Transaction
+            var transactionCreateDto = new TransactionCreateDTO
             {
-                Id = 1,
                 ItemId = 10,
                 FromLocationId = 1,
                 ToLocationId = 2,
-                UserId = "user1"
+                UserId = "user1",
+                Timestamp = DateTime.UtcNow
             };
 
             var item = new Item { Id = 10, Name = "Laptop", LocationId = 1 };
 
-            _transactionRepositoryMock.Setup(repo => repo.AddAsync(transaction))
-                .Returns(Task.CompletedTask);
+            var fromLocation = new Location { Id = 1, Name = "Warehouse A", Address = "Address 1" };
+            var toLocation = new Location { Id = 2, Name = "Warehouse B", Address = "Address 2" };
 
-            _itemRepositoryMock.Setup(repo => repo.GetByIdAsync(transaction.ItemId))
+            _itemRepositoryMock.Setup(repo => repo.GetByIdAsync(transactionCreateDto.ItemId))
                 .ReturnsAsync(item);
 
-            _locationRepositoryMock.Setup(repo => repo.GetByIdAsync(transaction.FromLocationId))
-                .ReturnsAsync(new Location { Id = 1, Name = "Warehouse A" });
+            _locationRepositoryMock.Setup(repo => repo.GetByIdAsync(transactionCreateDto.FromLocationId))
+                .ReturnsAsync(fromLocation);
 
-            _locationRepositoryMock.Setup(repo => repo.GetByIdAsync(transaction.ToLocationId))
-                .ReturnsAsync(new Location { Id = 2, Name = "Warehouse B" });
+            _locationRepositoryMock.Setup(repo => repo.GetByIdAsync(transactionCreateDto.ToLocationId))
+                .ReturnsAsync(toLocation);
+
+            _itemRepositoryMock.Setup(repo => repo.UpdateAsync(It.IsAny<Item>()))
+                .Returns(Task.CompletedTask);
+
+            _transactionRepositoryMock.Setup(repo => repo.AddAsync(It.IsAny<Transaction>()))
+                .Returns(Task.CompletedTask);
 
             // Act
-            await _transactionService.AddTransaction(transaction);
+            var result = await _transactionService.AddTransaction(transactionCreateDto);
 
             // Assert
-            item.LocationId.Should().Be(transaction.ToLocationId);
+            result.Should().NotBeNull();
+            result.ItemId.Should().Be(transactionCreateDto.ItemId);
+            result.FromLocationId.Should().Be(transactionCreateDto.FromLocationId);
+            result.ToLocationId.Should().Be(transactionCreateDto.ToLocationId);
+            result.UserId.Should().Be(transactionCreateDto.UserId);
+
+            // Проверяем, что у предмета обновился LocationId
+            item.LocationId.Should().Be(transactionCreateDto.ToLocationId);
+
+            // Проверяем, что методы были вызваны 1 раз
             _itemRepositoryMock.Verify(repo => repo.UpdateAsync(item), Times.Once);
-            _transactionRepositoryMock.Verify(repo => repo.AddAsync(transaction), Times.Once);
+            _transactionRepositoryMock.Verify(repo => repo.AddAsync(It.Is<Transaction>(t =>
+                t.ItemId == transactionCreateDto.ItemId &&
+                t.FromLocationId == transactionCreateDto.FromLocationId &&
+                t.ToLocationId == transactionCreateDto.ToLocationId &&
+                t.UserId == transactionCreateDto.UserId
+            )), Times.Once);
         }
+
 
         [Fact]
         public async Task AddTransaction_ShouldThrowException_WhenItemNotFound()
         {
             // Arrange
-            var transaction = new Transaction
-            {
-                Id = 1,
+            var transactionCreateDto = new TransactionCreateDTO
+            { 
                 ItemId = 99,
                 FromLocationId = 1,
                 ToLocationId = 2,
                 UserId = "user1"
             };
-
+            var transaction = new Transaction
+            {
+                ItemId = transactionCreateDto.ItemId,
+                FromLocationId = transactionCreateDto.FromLocationId,
+                ToLocationId = transactionCreateDto.ToLocationId,
+                UserId = transactionCreateDto.UserId,
+                Timestamp = transactionCreateDto.Timestamp
+            };
             _itemRepositoryMock.Setup(repo => repo.GetByIdAsync(transaction.ItemId))
                 .ReturnsAsync((Item)null);
-
+            
             // Act
-            var act = async () => await _transactionService.AddTransaction(transaction);
+            var act = async () => await _transactionService.AddTransaction(transactionCreateDto);
 
             // Assert
             await act.Should().ThrowAsync<Exception>().WithMessage("Item not found.");
@@ -144,13 +172,20 @@ namespace InventoryManagement.Tests.UnitTests.Services
         public async Task AddTransaction_ShouldThrowException_WhenLocationNotFound()
         {
             // Arrange
-            var transaction = new Transaction
+            var transactionCreateDto = new TransactionCreateDTO
             {
-                Id = 1,
-                ItemId = 10,
-                FromLocationId = 99,
+                ItemId = 99,
+                FromLocationId = 1,
                 ToLocationId = 2,
                 UserId = "user1"
+            };
+            var transaction = new Transaction
+            {
+                ItemId = transactionCreateDto.ItemId,
+                FromLocationId = transactionCreateDto.FromLocationId,
+                ToLocationId = transactionCreateDto.ToLocationId,
+                UserId = transactionCreateDto.UserId,
+                Timestamp = transactionCreateDto.Timestamp
             };
 
             var item = new Item { Id = 10, Name = "Laptop", LocationId = 1 };
@@ -162,10 +197,10 @@ namespace InventoryManagement.Tests.UnitTests.Services
                 .ReturnsAsync((Location)null);
 
             // Act
-            var act = async () => await _transactionService.AddTransaction(transaction);
+            var act = async () => await _transactionService.AddTransaction(transactionCreateDto);
 
             // Assert
-            await act.Should().ThrowAsync<Exception>().WithMessage("Location not found.");
+            await act.Should().ThrowAsync<Exception>().WithMessage("Invalid locations.");
             _transactionRepositoryMock.Verify(repo => repo.AddAsync(It.IsAny<Transaction>()), Times.Never);
         }
     }

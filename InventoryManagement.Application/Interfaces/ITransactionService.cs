@@ -1,4 +1,5 @@
-﻿using InventoryManagement.Domain.Entities;
+﻿using InventoryManagement.Application.DTOs.Transaction;
+using InventoryManagement.Domain.Entities;
 
 namespace InventoryManagement.Application.Interfaces
 {
@@ -6,6 +7,6 @@ namespace InventoryManagement.Application.Interfaces
     {
         Task<IEnumerable<Transaction>> GetAllTransactions();
         Task<Transaction> GetTransactionById(int id);
-        Task AddTransaction(Transaction transaction);
+        Task<Transaction> AddTransaction(TransactionCreateDTO transaction);
     }
 }
