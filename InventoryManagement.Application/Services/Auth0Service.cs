@@ -6,12 +6,12 @@ using InventoryManagement.Application.Interfaces;
 public class Auth0Service : IAuth0Service
 {
     private readonly IAuth0Repository _auth0Repository;
-    private readonly IUserService _userService;
+    private readonly IUserRepository _userRepository;
 
-    public Auth0Service(IAuth0Repository auth0Repository, IUserService userService)
+    public Auth0Service(IAuth0Repository auth0Repository, IUserRepository userRepository)
     {
         _auth0Repository = auth0Repository;
-        _userService = userService;
+        _userRepository = userRepository;
     }
 
     public async Task<string> GetAccessTokenAsync()
@@ -34,7 +34,7 @@ public class Auth0Service : IAuth0Service
             ManagedItems = new List<Item>()
         };
 
-        await _userService.AddUser(newUser);
+        await _userRepository.AddAsync(newUser);
         return newUser;
     }
 
@@ -42,7 +42,7 @@ public class Auth0Service : IAuth0Service
     {
         var auth0User = await _auth0Repository.UpdateUserAsync(userId, request);
 
-        var user = await _userService.GetUserById(userId);
+        var user = await _userRepository.GetByIdAsync(userId);
         if (user == null) 
             throw new Exception("Пользователь не найден в базе данных");
 
@@ -51,7 +51,7 @@ public class Auth0Service : IAuth0Service
         user.Email = request.Email;
         user.Role = request.Role;
 
-        await _userService.UpdateUser(user);
+        await _userRepository.UpdateAsync(user);
         return user;
     }
 
@@ -63,6 +63,6 @@ public class Auth0Service : IAuth0Service
     public async Task DeleteUserAsync(string userId)
     {
         await _auth0Repository.DeleteUserAsync(userId);
-        await _userService.DeleteUser(userId);
+        await _userRepository.DeleteAsync(userId);
     }
 }

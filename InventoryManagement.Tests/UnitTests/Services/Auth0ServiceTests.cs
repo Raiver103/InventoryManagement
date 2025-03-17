@@ -3,20 +3,21 @@ using InventoryManagement.Domain.Entities;
 using InventoryManagement.Domain.Interfaces;
 using Moq;
 using InventoryManagement.Application.Interfaces;
+using InventoryManagement.Infastructure.Repositories;
 
 namespace InventoryManagement.Tests.UnitTests.Services
 {
     public class Auth0ServiceTests
     {
         private readonly Mock<IAuth0Repository> _auth0RepositoryMock;
-        private readonly Mock<IUserService> _userServiceMock;
+        private readonly Mock<IUserRepository> _userRepositoryMock;
         private readonly Auth0Service _auth0Service;
 
         public Auth0ServiceTests()
         {
             _auth0RepositoryMock = new Mock<IAuth0Repository>();
-            _userServiceMock = new Mock<IUserService>();
-            _auth0Service = new Auth0Service(_auth0RepositoryMock.Object, _userServiceMock.Object);
+            _userRepositoryMock = new Mock<IUserRepository>();
+            _auth0Service = new Auth0Service(_auth0RepositoryMock.Object, _userRepositoryMock.Object);
         }
 
         [Fact]
@@ -36,7 +37,7 @@ namespace InventoryManagement.Tests.UnitTests.Services
             var auth0User = new Auth0UserResponse { Id = "12345" };
 
             _auth0RepositoryMock.Setup(repo => repo.CreateUserAsync(request)).ReturnsAsync(auth0User);
-            _userServiceMock.Setup(us => us.AddUser(It.IsAny<User>())).Returns(Task.CompletedTask);
+            _userRepositoryMock.Setup(us => us.AddAsync(It.IsAny<User>())).Returns(Task.CompletedTask);
 
             var newUser = await _auth0Service.CreateUserAsync(request);
 
@@ -54,8 +55,8 @@ namespace InventoryManagement.Tests.UnitTests.Services
             var existingUser = new User { Id = "12345", FirstName = "OldName", LastName = "OldLast", Email = "old@example.com", Role = "OldRole" };
 
             _auth0RepositoryMock.Setup(repo => repo.UpdateUserAsync("12345", request)).ReturnsAsync(auth0User);
-            _userServiceMock.Setup(us => us.GetUserById("12345")).ReturnsAsync(existingUser);
-            _userServiceMock.Setup(us => us.UpdateUser(It.IsAny<User>())).Returns(Task.CompletedTask);
+            _userRepositoryMock.Setup(us => us.GetByIdAsync("12345")).ReturnsAsync(existingUser);
+            _userRepositoryMock.Setup(us => us.UpdateAsync(It.IsAny<User>())).Returns(Task.CompletedTask);
 
             var updatedUser = await _auth0Service.UpdateUserAsync("12345", request);
 
@@ -80,12 +81,12 @@ namespace InventoryManagement.Tests.UnitTests.Services
         public async Task DeleteUserAsync_ShouldDeleteUser()
         {
             _auth0RepositoryMock.Setup(repo => repo.DeleteUserAsync("12345")).Returns(Task.CompletedTask);
-            _userServiceMock.Setup(us => us.DeleteUser("12345")).Returns(Task.CompletedTask);
+            _userRepositoryMock.Setup(us => us.DeleteAsync("12345")).Returns(Task.CompletedTask);
 
             await _auth0Service.DeleteUserAsync("12345");
 
             _auth0RepositoryMock.Verify(repo => repo.DeleteUserAsync("12345"), Times.Once);
-            _userServiceMock.Verify(us => us.DeleteUser("12345"), Times.Once);
+            _userRepositoryMock.Verify(us => us.DeleteAsync("12345"), Times.Once);
         }
     }
 

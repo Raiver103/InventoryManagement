@@ -1,4 +1,5 @@
-﻿using InventoryManagement.Application.Interfaces;
+﻿using InventoryManagement.Application.DTOs.User;
+using InventoryManagement.Application.Interfaces;
 using InventoryManagement.Domain.Entities;
 using InventoryManagement.Domain.Entities.Auth0;
 using Microsoft.AspNetCore.Mvc;
@@ -53,7 +54,7 @@ namespace InventoryManagement.Tests.IntegrationTests.Controllers
 
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(result);
-            var returnedUser = Assert.IsType<User>(okResult.Value);
+            var returnedUser = Assert.IsType<UserResponseDTO>(okResult.Value);
             Assert.Equal("789", returnedUser.Id);
             Assert.Equal("test@example.com", returnedUser.Email);
         }

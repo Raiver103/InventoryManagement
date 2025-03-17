@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using InventoryManagement.Domain.Entities.Auth0;
 using InventoryManagement.Application.Interfaces;
+using InventoryManagement.Application.DTOs.User;
 
 [Route("api/auth0")]
 [ApiController]
@@ -23,7 +24,17 @@ public class Auth0Controller : ControllerBase
     public async Task<IActionResult> CreateUser([FromBody] CreateUserRequest request)
     {
         var user = await _auth0Service.CreateUserAsync(request);
-        return Ok(user);
+
+        var userResponse = new UserResponseDTO
+        {
+            Id = user.Id,
+            Email = user.Email,
+            FirstName = user.FirstName,
+            LastName = user.LastName,
+            Role = user.Role
+        };
+
+        return Ok(userResponse);
     }
 
     [HttpPatch("update-user/{userId}")]

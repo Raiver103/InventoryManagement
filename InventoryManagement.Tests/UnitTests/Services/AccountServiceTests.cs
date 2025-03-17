@@ -114,6 +114,7 @@ namespace InventoryManagement.Tests.UnitTests.Services
             // Act & Assert
             await Assert.ThrowsAsync<Exception>(() => _accountService.AssignRoleAfterLoginAsync(claimsPrincipal, "InvalidRole"));
         }
+
     }
 
 }
