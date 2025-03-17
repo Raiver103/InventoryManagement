@@ -10,10 +10,8 @@ using InventoryManagement.Infastructure.Persistence;
 using InventoryManagement.Infastructure.Repositories;
 using InventoryManagement.Infrastructure.Repositories;
 using InventoryManagement.WEB.Components;
-using InventoryManagement.WEB.Controollers;
 using InventoryManagement.WEB.Middleware;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 

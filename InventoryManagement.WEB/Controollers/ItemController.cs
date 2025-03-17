@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using InventoryManagement.Application.DTOs.Item;
 using InventoryManagement.Application.Interfaces;
-using InventoryManagement.Application.Services;
 using InventoryManagement.Domain.Entities;
 using InventoryManagement.Infastructure.Hubs; 
 using Microsoft.AspNetCore.Mvc;

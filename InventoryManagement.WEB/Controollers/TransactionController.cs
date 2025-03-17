@@ -1,11 +1,9 @@
 ﻿using AutoMapper;
 using InventoryManagement.Application.DTOs.Transaction;
-using InventoryManagement.Application.Services;
 using InventoryManagement.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using System.Text;
-using ClosedXML.Excel;
 using InventoryManagement.Infastructure.Hubs;
 using InventoryManagement.Application.Interfaces;
 

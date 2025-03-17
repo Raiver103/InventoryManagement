@@ -1,9 +1,7 @@
 ﻿using AutoMapper;
 using InventoryManagement.Application.DTOs.Location;
 using InventoryManagement.Application.Interfaces;
-using InventoryManagement.Application.Services;
 using InventoryManagement.Domain.Entities;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace InventoryManagement.WEB.Controollers

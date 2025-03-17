@@ -1,15 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using System.Net.Http;
-using System.Text;
-using System.Threading.Tasks;
-using Newtonsoft.Json;
-using Microsoft.Extensions.Configuration;
-using InventoryManagement.Domain.Entities;
-using Microsoft.EntityFrameworkCore;
-using InventoryManagement.Application.Services;
-using InventoryManagement.Infastructure.Persistence;
-using BCrypt.Net;
-using Azure.Core;
 using InventoryManagement.Domain.Entities.Auth0;
 using InventoryManagement.Application.Interfaces;
 

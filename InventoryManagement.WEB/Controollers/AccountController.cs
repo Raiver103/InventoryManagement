@@ -1,22 +1,10 @@
 ﻿using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication.OAuth;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
-using System;
 using Auth0.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication;
 using InventoryManagement.Application.DTOs.User;
-using Microsoft.AspNetCore.Authentication.OpenIdConnect;
-using InventoryManagement.Application.Services;
-using InventoryManagement.Domain.Entities;
-using AutoMapper;
-using Newtonsoft.Json;
-using System.Net.Http;
-using System.Text;
-using Infrastructure.Repositories;
-using InventoryManagement.Domain.Interfaces;
-using InventoryManagement.Application.Models.Auth0;
 using InventoryManagement.Application.Interfaces;
 
 namespace InventoryManagement.WEB.Controollers
