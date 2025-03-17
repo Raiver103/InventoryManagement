@@ -2,6 +2,7 @@
 using InventoryManagement.Application.Interfaces;
 using InventoryManagement.Domain.Entities;
 using InventoryManagement.Domain.Entities.Auth0;
+using InventoryManagement.WEB.Controllers;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 
@@ -24,10 +25,10 @@ namespace InventoryManagement.Tests.IntegrationTests.Controllers
         {
             // Arrange
             var users = new List<Auth0UserResponse>
-    {
-        new Auth0UserResponse { Id = "123", Email = "user1@example.com" },
-        new Auth0UserResponse { Id = "456", Email = "user2@example.com" }
-    };
+            {
+                new Auth0UserResponse { Id = "123", Email = "user1@example.com" },
+                new Auth0UserResponse { Id = "456", Email = "user2@example.com" }
+            };
             _auth0ServiceMock.Setup(service => service.GetUsersAsync()).ReturnsAsync(users);
 
             // Act

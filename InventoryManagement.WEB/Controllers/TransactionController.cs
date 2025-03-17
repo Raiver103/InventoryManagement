@@ -6,8 +6,9 @@ using Microsoft.AspNetCore.SignalR;
 using System.Text;
 using InventoryManagement.Infastructure.Hubs;
 using InventoryManagement.Application.Interfaces;
+using Swashbuckle.AspNetCore.Annotations; // Добавлено для Swagger
 
-namespace InventoryManagement.WEB.Controollers
+namespace InventoryManagement.WEB.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
@@ -28,14 +29,28 @@ namespace InventoryManagement.WEB.Controollers
             _hubContext = hubContext;
         }
 
+        /// <summary>
+        /// Получить список всех транзакций.
+        /// </summary>
+        /// <returns>Список транзакций.</returns>
         [HttpGet]
+        [SwaggerOperation(Summary = "Получить все транзакции", Description = "Возвращает список всех транзакций.")]
+        [ProducesResponseType(typeof(IEnumerable<TransactionResponseDTO>), 200)]
         public async Task<IActionResult> GetAll()
         {
             var transactions = await _transactionService.GetAllTransactions();
             return Ok(_mapper.Map<IEnumerable<TransactionResponseDTO>>(transactions));
         }
 
+        /// <summary>
+        /// Получить транзакцию по ID.
+        /// </summary>
+        /// <param name="id">ID транзакции.</param>
+        /// <returns>Транзакция.</returns>
         [HttpGet("{id}")]
+        [SwaggerOperation(Summary = "Получить транзакцию", Description = "Возвращает транзакцию по указанному ID.")]
+        [ProducesResponseType(typeof(TransactionResponseDTO), 200)]
+        [ProducesResponseType(404)]
         public async Task<IActionResult> Get(int id)
         {
             try
@@ -49,7 +64,16 @@ namespace InventoryManagement.WEB.Controollers
             }
         }
 
+        /// <summary>
+        /// Создать новую транзакцию.
+        /// </summary>
+        /// <param name="transactionCreateDto">Данные новой транзакции.</param>
+        /// <returns>Созданная транзакция.</returns>
         [HttpPost]
+        [SwaggerOperation(Summary = "Создать транзакцию", Description = "Создает новую транзакцию и отправляет обновление через SignalR.")]
+        [ProducesResponseType(typeof(TransactionResponseDTO), 201)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(500)]
         public async Task<IActionResult> Create([FromBody] TransactionCreateDTO transactionCreateDto)
         {
             if (transactionCreateDto == null)
@@ -63,7 +87,7 @@ namespace InventoryManagement.WEB.Controollers
                 await _hubContext.Clients.All.SendAsync("ReceiveUpdate", createdTransactionDto);
                 return CreatedAtAction(nameof(Get), new { id = createdTransaction.Id }, createdTransactionDto);
             }
-            catch (ArgumentException ex)  
+            catch (ArgumentException ex)
             {
                 return BadRequest(new { error = ex.Message });
             }

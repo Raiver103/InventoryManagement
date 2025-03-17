@@ -3,8 +3,9 @@ using InventoryManagement.Application.DTOs.Location;
 using InventoryManagement.Application.Interfaces;
 using InventoryManagement.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Annotations; // Добавлено для Swagger
 
-namespace InventoryManagement.WEB.Controollers
+namespace InventoryManagement.WEB.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
@@ -19,8 +20,13 @@ namespace InventoryManagement.WEB.Controollers
             _mapper = mapper;
         }
 
-        // Получение всех локаций
+        /// <summary>
+        /// Получает список всех локаций.
+        /// </summary>
+        /// <returns>Список локаций.</returns>
         [HttpGet]
+        [SwaggerOperation(Summary = "Получить все локации", Description = "Возвращает список всех доступных локаций.")]
+        [ProducesResponseType(typeof(IEnumerable<LocationResponseDTO>), 200)]
         public async Task<IActionResult> GetAll()
         {
             var locations = await _locationService.GetAllLocations();
@@ -28,8 +34,15 @@ namespace InventoryManagement.WEB.Controollers
             return Ok(locationDtos);
         }
 
-        // Получение локации по ID
+        /// <summary>
+        /// Получает локацию по ID.
+        /// </summary>
+        /// <param name="id">ID локации.</param>
+        /// <returns>Информация о локации.</returns>
         [HttpGet("{id}")]
+        [SwaggerOperation(Summary = "Получить локацию по ID", Description = "Возвращает данные конкретной локации.")]
+        [ProducesResponseType(typeof(LocationResponseDTO), 200)]
+        [ProducesResponseType(404)]
         public async Task<IActionResult> Get(int id)
         {
             var location = await _locationService.GetLocationById(id);
@@ -41,9 +54,16 @@ namespace InventoryManagement.WEB.Controollers
             return Ok(locationDto);
         }
 
-        // Создание новой локации
+        /// <summary>
+        /// Создает новую локацию.
+        /// </summary>
+        /// <param name="locationCreateDto">Данные новой локации.</param>
+        /// <returns>Созданная локация.</returns>
         [HttpPost]
         [IgnoreAntiforgeryToken]
+        [SwaggerOperation(Summary = "Создать локацию", Description = "Создает новую локацию в системе.")]
+        [ProducesResponseType(typeof(LocationResponseDTO), 201)]
+        [ProducesResponseType(400)]
         public async Task<IActionResult> Create([FromBody] LocationCreateDTO locationCreateDto)
         {
             if (locationCreateDto == null)
@@ -51,17 +71,23 @@ namespace InventoryManagement.WEB.Controollers
                 return BadRequest();
             }
 
-            // Маппинг CreateDTO в сущность
             var location = _mapper.Map<Location>(locationCreateDto);
             await _locationService.AddLocation(location);
 
-            // Маппинг сущности в ResponseDTO для ответа
             var createdLocationDto = _mapper.Map<LocationResponseDTO>(location);
             return CreatedAtAction(nameof(Get), new { id = location.Id }, createdLocationDto);
         }
 
-        // Обновление локации
+        /// <summary>
+        /// Обновляет данные локации.
+        /// </summary>
+        /// <param name="id">ID локации.</param>
+        /// <param name="locationUpdateDto">Обновленные данные.</param>
         [HttpPut("{id}")]
+        [SwaggerOperation(Summary = "Обновить локацию", Description = "Обновляет данные о локации.")]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
         public async Task<IActionResult> Update(int id, [FromBody] LocationCreateDTO locationUpdateDto)
         {
             if (locationUpdateDto == null)
@@ -69,25 +95,26 @@ namespace InventoryManagement.WEB.Controollers
                 return BadRequest();
             }
 
-            // Получаем локацию по ID
             var location = await _locationService.GetLocationById(id);
             if (location == null)
             {
                 return NotFound();
             }
 
-            // Маппинг CreateDTO в существующую сущность
             _mapper.Map(locationUpdateDto, location);
-
-            // Сохраняем изменения в базе данных
             await _locationService.UpdateLocation(location);
 
-            // Возвращаем 204 (No Content) в случае успеха
             return NoContent();
         }
 
-        // Удаление локации
+        /// <summary>
+        /// Удаляет локацию.
+        /// </summary>
+        /// <param name="id">ID локации.</param>
         [HttpDelete("{id}")]
+        [SwaggerOperation(Summary = "Удалить локацию", Description = "Удаляет локацию по заданному ID.")]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(404)]
         public async Task<IActionResult> Delete(int id)
         {
             var location = await _locationService.GetLocationById(id);

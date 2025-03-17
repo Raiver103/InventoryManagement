@@ -1,7 +1,7 @@
 ﻿using InventoryManagement.Application.DTOs.User;
 using InventoryManagement.Application.Interfaces;
 using InventoryManagement.Application.Services;
-using InventoryManagement.WEB.Controollers;
+using InventoryManagement.WEB.Controllers;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -81,13 +81,13 @@ namespace InventoryManagement.Tests.IntegrationTests.Controllers
         {
             // Arrange
             var claims = new List<Claim>
-        {
-            new Claim(ClaimTypes.NameIdentifier, "123"),
-            new Claim("https://your-app.com/first_name", "John"),
-            new Claim("https://your-app.com/last_name", "Doe"),
-            new Claim("nickname", "johndoe"),
-            new Claim("picture", "https://example.com/profile.jpg")
-        };
+            {
+                new Claim(ClaimTypes.NameIdentifier, "123"),
+                new Claim("https://your-app.com/first_name", "John"),
+                new Claim("https://your-app.com/last_name", "Doe"),
+                new Claim("nickname", "johndoe"),
+                new Claim("picture", "https://example.com/profile.jpg")
+            };
             var identity = new ClaimsIdentity(claims, "mock");
             var user = new ClaimsPrincipal(identity);
 
