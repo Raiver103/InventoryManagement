@@ -1,10 +1,5 @@
 ﻿using InventoryManagement.Domain.Entities.Auth0.Metadata;
 using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace InventoryManagement.Domain.Entities.Auth0
 {
@@ -21,6 +16,7 @@ namespace InventoryManagement.Domain.Entities.Auth0
 
         [JsonProperty("app_metadata")]
         public Auth0AppMetadata AppMetadata { get; set; }
+
         public string FirstName => Metadata?.FirstName;
         public string LastName => Metadata?.LastName;
         public string Role => AppMetadata?.Role;
