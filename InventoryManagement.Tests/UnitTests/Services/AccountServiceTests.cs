@@ -113,8 +113,20 @@ namespace InventoryManagement.Tests.UnitTests.Services
 
             // Act & Assert
             await Assert.ThrowsAsync<Exception>(() => _accountService.AssignRoleAfterLoginAsync(claimsPrincipal, "InvalidRole"));
+        } 
+
+        [Fact]
+        public async Task SyncUserAsync_ShouldNotCreateUser_WhenUserIsNotAuthenticated()
+        {
+            // Arrange
+            var claimsPrincipal = new ClaimsPrincipal(new ClaimsIdentity());
+
+            // Act
+            await _accountService.SyncUserAsync(claimsPrincipal);
+
+            // Assert
+            _userRepositoryMock.Verify(us => us.AddAsync(It.IsAny<User>()), Times.Never);
         }
 
     }
-
 }

@@ -94,5 +94,48 @@ namespace InventoryManagement.Tests.IntegrationTests.Controllers
             Assert.IsType<NoContentResult>(result);
             _auth0ServiceMock.Verify(service => service.DeleteUserAsync("123"), Times.Once);
         }
+
+        [Fact]
+        public async Task GetAccessTokenAsync_ShouldReturnToken()
+        {
+            // Arrange
+            var expectedToken = "test-access-token";
+            _auth0ServiceMock.Setup(service => service.GetAccessTokenAsync()).ReturnsAsync(expectedToken);
+
+            // Act
+            var result = await _controller.GetAccessTokenAsync();
+
+            // Assert
+            Assert.Equal(expectedToken, result);
+        } 
+
+        [Fact]
+        public async Task CreateUser_ShouldReturnBadRequest_WhenExceptionThrown()
+        {
+            // Arrange
+            _auth0ServiceMock.Setup(service => service.CreateUserAsync(It.IsAny<CreateUserRequest>()))
+                .ThrowsAsync(new Exception("Error creating user"));
+
+            // Act
+            var result = await _controller.CreateUser(new CreateUserRequest());
+
+            // Assert
+            Assert.IsType<BadRequestObjectResult>(result);
+        }
+
+        [Fact]
+        public async Task UpdateUser_ShouldReturnNotFound_WhenUserDoesNotExist()
+        {
+            // Arrange
+            _auth0ServiceMock.Setup(service => service.UpdateUserAsync("999", It.IsAny<UpdateUserRequest>()))
+                .ReturnsAsync((User)null);
+
+            // Act
+            var result = await _controller.UpdateUser("999", new UpdateUserRequest());
+
+            // Assert
+            Assert.IsType<NotFoundResult>(result);
+        }
+
     }
 }

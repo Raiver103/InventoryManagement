@@ -88,6 +88,40 @@ namespace InventoryManagement.Tests.UnitTests.Services
             _auth0RepositoryMock.Verify(repo => repo.DeleteUserAsync("12345"), Times.Once);
             _userRepositoryMock.Verify(us => us.DeleteAsync("12345"), Times.Once);
         }
+
+        [Fact]
+        public async Task CreateUserAsync_ShouldThrowException_WhenAuth0UserCreationFails()
+        {
+            // Arrange
+            var request = new CreateUserRequest { FirstName = "John", LastName = "Doe", Role = "Admin", Email = "test@example.com", Password = "password123" };
+            _auth0RepositoryMock.Setup(repo => repo.CreateUserAsync(request)).ReturnsAsync((Auth0UserResponse)null);
+
+            // Act & Assert
+            await Assert.ThrowsAsync<Exception>(() => _auth0Service.CreateUserAsync(request));
+        }
+
+        [Fact]
+        public async Task UpdateUserAsync_ShouldThrowException_WhenUserNotFound()
+        {
+            // Arrange
+            var request = new UpdateUserRequest { FirstName = "Jane", LastName = "Smith", Role = "User", Email = "jane@example.com" };
+            _userRepositoryMock.Setup(us => us.GetByIdAsync("non-existent-id")).ReturnsAsync((User)null);
+
+            // Act & Assert
+            await Assert.ThrowsAsync<Exception>(() => _auth0Service.UpdateUserAsync("non-existent-id", request));
+        }
+
+        [Fact]
+        public async Task DeleteUserAsync_ShouldNotCallAuth0Delete_WhenDatabaseDeleteFails()
+        {
+            // Arrange
+            _userRepositoryMock.Setup(us => us.DeleteAsync("12345")).ThrowsAsync(new Exception("DB error"));
+
+            // Act & Assert
+            await Assert.ThrowsAsync<Exception>(() => _auth0Service.DeleteUserAsync("12345"));
+            _auth0RepositoryMock.Verify(repo => repo.DeleteUserAsync(It.IsAny<string>()), Times.Never);
+        }
+
     }
 
 }

@@ -35,21 +35,29 @@ namespace InventoryManagement.WEB.Controllers
         [HttpPost("create-user")]
         [SwaggerOperation(Summary = "Создает пользователя", Description = "Создает нового пользователя в Auth0.")]
         [ProducesResponseType(typeof(UserResponseDTO), 200)]
-        [ProducesResponseType(400)]
+        [ProducesResponseType(400, Type = typeof(object))]
+        [ProducesResponseType(500, Type = typeof(object))]
         public async Task<IActionResult> CreateUser([FromBody] CreateUserRequest request)
         {
-            var user = await _auth0Service.CreateUserAsync(request);
-
-            var userResponse = new UserResponseDTO
+            try
             {
-                Id = user.Id,
-                Email = user.Email,
-                FirstName = user.FirstName,
-                LastName = user.LastName,
-                Role = user.Role
-            };
+                var user = await _auth0Service.CreateUserAsync(request);
 
-            return Ok(userResponse);
+                var userResponse = new UserResponseDTO
+                {
+                    Id = user.Id,
+                    Email = user.Email,
+                    FirstName = user.FirstName,
+                    LastName = user.LastName,
+                    Role = user.Role
+                };
+
+                return Ok(userResponse);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         /// <summary>
@@ -60,12 +68,17 @@ namespace InventoryManagement.WEB.Controllers
         /// <returns>Обновленный пользователь.</returns>
         [HttpPatch("update-user/{userId}")]
         [SwaggerOperation(Summary = "Обновляет пользователя", Description = "Обновляет информацию о пользователе в Auth0.")]
-        [ProducesResponseType(typeof(Auth0UserResponse), 200)]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(404)]
+        [ProducesResponseType(typeof(Auth0UserResponse), 200)]  
+        [ProducesResponseType(400, Type = typeof(object))] 
+        [ProducesResponseType(404, Type = typeof(object))] 
+        [ProducesResponseType(500, Type = typeof(object))] 
         public async Task<IActionResult> UpdateUser(string userId, [FromBody] UpdateUserRequest request)
         {
             var user = await _auth0Service.UpdateUserAsync(userId, request);
+            if (user == null)
+            {
+                return NotFound();
+            }
             return Ok(user);
         }
 

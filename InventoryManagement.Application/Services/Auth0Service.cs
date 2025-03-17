@@ -23,6 +23,11 @@ public class Auth0Service : IAuth0Service
     {
         var auth0User = await _auth0Repository.CreateUserAsync(request);
 
+        if (auth0User == null)
+        {
+            throw new Exception("Ошибка при создании пользователя в Auth0");
+        }
+
         var newUser = new User
         {
             Id = auth0User.Id,
@@ -64,8 +69,8 @@ public class Auth0Service : IAuth0Service
     {
         try
         {
-            await _userRepository.DeleteAsync(userId); // 🛑 Сначала пытаемся удалить из БД
-            await _auth0Repository.DeleteUserAsync(userId); // ✅ Если удаление в БД успешно, удаляем в Auth0
+            await _userRepository.DeleteAsync(userId);  
+            await _auth0Repository.DeleteUserAsync(userId);  
         }
         catch (Exception ex)
         {
