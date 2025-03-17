@@ -23,7 +23,6 @@ namespace InventoryManagement.WEB.Controollers
             _hubContext = hubContext;
         }
 
-        // Получение всех товаров
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
@@ -32,7 +31,6 @@ namespace InventoryManagement.WEB.Controollers
             return Ok(itemsDto);
         }
 
-        // Получение товара по ID
         [HttpGet("{id}")] 
         public async Task<IActionResult> Get(int id)
         {
@@ -45,7 +43,6 @@ namespace InventoryManagement.WEB.Controollers
             return Ok(itemDto);
         }
 
-        // Создание товара
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] ItemCreateDTO itemCreateDto)
         {

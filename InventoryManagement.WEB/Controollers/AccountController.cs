@@ -18,6 +18,7 @@ namespace InventoryManagement.WEB.Controollers
             _accountService = accountService;
         }
 
+        [ApiExplorerSettings(IgnoreApi = true)]
         [HttpGet("/Account/AfterLogin")]
         public async Task<IActionResult> AfterLogin(string returnUrl = "/")
         {
@@ -26,18 +27,21 @@ namespace InventoryManagement.WEB.Controollers
             return Redirect("https://localhost:7025/afterlogin");
         }
 
+        [ApiExplorerSettings(IgnoreApi = true)]
         [HttpGet("/Account/Login")]
         public async Task<IActionResult> Login(string returnUrl = "/")
         { 
             return Redirect("https://localhost:7025/login");
         }
 
+        [ApiExplorerSettings(IgnoreApi = true)]
         [HttpGet("/Account/AccessDenied")]
         public IActionResult LoginUserRedirectAccessDenied(string returnUrl = "/")
         {
             return Redirect("https://localhost:7025/login");
         }
 
+        [ApiExplorerSettings(IgnoreApi = true)]
         [HttpGet("/Auth/Login")]
         public async Task LoginUser(string returnUrl = "/Account/AfterLogin")
         { 
@@ -48,6 +52,7 @@ namespace InventoryManagement.WEB.Controollers
             await HttpContext.ChallengeAsync(Auth0Constants.AuthenticationScheme, authenticationProperties);
         }
 
+        [ApiExplorerSettings(IgnoreApi = true)]
         [HttpGet("/Account/Signup")]
         public async Task Signup(string returnUrl = "/")
         {
@@ -57,9 +62,9 @@ namespace InventoryManagement.WEB.Controollers
             .Build();
 
             await HttpContext.ChallengeAsync(Auth0Constants.AuthenticationScheme, authenticationProperties);
-             
         }
 
+        [ApiExplorerSettings(IgnoreApi = true)]
         [Authorize]
         [HttpGet("/Account/Logout")]
         public async Task Logout()
@@ -73,6 +78,7 @@ namespace InventoryManagement.WEB.Controollers
 
         }
 
+        [ApiExplorerSettings(IgnoreApi = true)]
         [Authorize]
         [HttpGet("/Account/Profile")]
         public async Task<IActionResult> Profile()

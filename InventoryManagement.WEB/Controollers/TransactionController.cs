@@ -15,7 +15,7 @@ namespace InventoryManagement.WEB.Controollers
     {
         private readonly ITransactionService _transactionService;
         private readonly IItemService _itemService;
-        private readonly IReportService _reportService;
+        //private readonly IReportService _reportService;
         private readonly IMapper _mapper;
         private readonly IHubContext<InventoryHub> _hubContext;
 
@@ -23,15 +23,13 @@ namespace InventoryManagement.WEB.Controollers
             ITransactionService transactionService, 
             IItemService itemService, 
             IMapper mapper,
-            IHubContext<InventoryHub> hubContext,
-            IReportService reportService
+            IHubContext<InventoryHub> hubContext 
             ) 
         {
             _transactionService = transactionService;
             _itemService = itemService;
             _mapper = mapper;
-            _hubContext = hubContext;
-            _reportService = reportService;
+            _hubContext = hubContext; 
         }
 
         // Получение всех транзакций
@@ -65,20 +63,17 @@ namespace InventoryManagement.WEB.Controollers
                 return BadRequest("Transaction data is required.");
             }
 
-            // Проверка: нельзя переместить товар в ту же локацию
             if (transactionCreateDto.FromLocationId == transactionCreateDto.ToLocationId)
             {
                 return BadRequest("Item cannot be moved to the same location.");
             }
 
-            // Загружаем товар по ID
             var item = await _itemService.GetItemById(transactionCreateDto.ItemId);
             if (item == null)
             {
                 return NotFound("Item not found.");
             }
 
-            // Проверяем, что FromLocationId совпадает с текущим местоположением товара
             if (item.LocationId != transactionCreateDto.FromLocationId)
             {
                 return BadRequest("Item's current location does not match FromLocationId.");
@@ -97,26 +92,6 @@ namespace InventoryManagement.WEB.Controollers
             await _hubContext.Clients.All.SendAsync("ReceiveUpdate", createdTransactionDto);
 
             return CreatedAtAction(nameof(Get), new { id = transaction.Id }, createdTransactionDto);
-        }
-
-        [HttpGet("export/{format}")]
-        public async Task<IActionResult> ExportTransactions(string format)
-        {
-            var transactions = await _transactionService.GetAllTransactions();
-            var transactionsDto = _mapper.Map<IEnumerable<TransactionResponseDTO>>(transactions);
-
-            if (format.ToLower() == "csv")
-            {
-                var csvData = _reportService.GenerateCsv(transactionsDto);
-                return File(Encoding.UTF8.GetBytes(csvData), "text/csv", "transactions.csv");
-            }
-            else if (format.ToLower() == "excel")
-            {
-                var excelFile = _reportService.GenerateExcel(transactionsDto);
-                return File(excelFile, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "transactions.xlsx");
-            }
-
-            return BadRequest("Invalid format. Use 'csv' or 'excel'.");
-        }
+        } 
     }
 }

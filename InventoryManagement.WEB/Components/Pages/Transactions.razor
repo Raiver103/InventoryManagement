@@ -105,7 +105,7 @@ else
     private async Task ExportReport(string format)
     {
         var client = HttpClientFactory.CreateClient("ApiClient");
-        var response = await client.GetAsync($"api/transaction/export/{format}");
+        var response = await client.GetAsync($"api/reports/export/{format}");
 
         if (response.IsSuccessStatusCode)
         {

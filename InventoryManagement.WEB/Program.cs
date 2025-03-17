@@ -13,16 +13,17 @@ using InventoryManagement.WEB.Components;
 using InventoryManagement.WEB.Middleware;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
-using Serilog;
+using Microsoft.OpenApi.Models;
+using Serilog; 
 
-namespace InventoryManagement.WEB { 
+namespace InventoryManagement.WEB
+{
     public class Program
     {
         private static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
             builder.Services.AddRazorComponents()
                 .AddInteractiveServerComponents();
 
@@ -45,15 +46,13 @@ namespace InventoryManagement.WEB {
             });
             builder.Services.AddControllersWithViews();
 
-            //builder.Services.AddRazorPages();
-            //builder.Services.AddServerSideBlazor();
             builder.Services.AddSignalR();
 
             builder.Services.AddAutoMapper(typeof(MappingProfile).Assembly);
 
             builder.Services.AddDbContext<AppDbContext>(options =>
-                            options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-        
+                    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
             builder.Services.AddSingleton<IClaimsTransformation, ClaimsTransformation>();
 
             builder.Services.AddHttpClient<Auth0Service>();
@@ -80,34 +79,50 @@ namespace InventoryManagement.WEB {
 
             builder.Services.AddHttpClient("ApiClient", client =>
             {
-                client.BaseAddress = new Uri("https://localhost:7025/"); // Замени на свой API URL
+                client.BaseAddress = new Uri("https://localhost:7025/");
             });
 
             Log.Logger = new LoggerConfiguration()
-            .WriteTo.Console()
-            .WriteTo.File("Logs/log-.txt", rollingInterval: RollingInterval.Day)
-            .Enrich.FromLogContext()
-            .CreateLogger();
+                .WriteTo.Console()
+                .WriteTo.File("Logs/log-.txt", rollingInterval: RollingInterval.Day)
+                .Enrich.FromLogContext()
+                .CreateLogger();
 
             builder.Host.UseSerilog();
 
-                //builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
+            builder.Services.AddEndpointsApiExplorer();
+            builder.Services.AddSwaggerGen(options =>
+            {
+                options.SwaggerDoc("v1", new OpenApiInfo
+                {
+                    Title = "InventoryManagement API",
+                    Version = "v1",
+                    Description = "API for managing inventory, users, and transactions.",
+                    Contact = new OpenApiContact
+                    {
+                        Name = "Ilya Maksimovich",
+                        Url = new Uri("https://github.com/Raiver103/InventoryManagement")
+                    }
+                });
 
-            //builder.Services.AddAntiforgery(options => options.HeaderName = "X-XSRF-TOKEN");
+                // Включаем XML-документацию (см. шаг 3)
+                var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+                options.IncludeXmlComments(xmlPath);
+            });
+
 
             var app = builder.Build();
-            // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())
             {
                 app.UseExceptionHandler("/Error", createScopeForErrors: true);
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+
                 app.UseHsts();
             }
 
             app.UseMiddleware<ExceptionMiddleware>();
             app.UseSerilogRequestLogging();
-                
+
             app.MapHub<InventoryHub>("/inventoryHub");
 
             app.UseHttpsRedirection();
@@ -118,7 +133,7 @@ namespace InventoryManagement.WEB {
             app.UseSwagger();
             app.UseSwaggerUI();
 
-            app.UseAuthentication(); // new line
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.MapControllers();
@@ -127,11 +142,9 @@ namespace InventoryManagement.WEB {
                 pattern: "{controller=Home}/{action=Index}/{id?}");
 
             app.MapRazorComponents<App>()
-                .AddInteractiveServerRenderMode();
-
-            //app.MapBlazorHub();
+                    .AddInteractiveServerRenderMode();
 
             app.Run();
         }
-    }
+    } 
 }

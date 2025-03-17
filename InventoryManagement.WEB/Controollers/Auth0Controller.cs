@@ -13,7 +13,7 @@ public class Auth0Controller : ControllerBase
         _auth0Service = auth0Service;
     }
 
-    [HttpPost("get-access-token")]
+    [ApiExplorerSettings(IgnoreApi = true)] 
     public async Task<string> GetAccessTokenAsync()
     {
         return await _auth0Service.GetAccessTokenAsync();
