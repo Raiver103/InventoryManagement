@@ -4,7 +4,7 @@ using InventoryManagement.Domain.Entities;
 using InventoryManagement.Domain.Interfaces;
 using InventoryManagement.Application.Interfaces;
 
-public class Auth0Service
+public class Auth0Service : IAuth0Service
 {
     private readonly IAuth0Repository _auth0Repository;
     private readonly IUserService _userService;

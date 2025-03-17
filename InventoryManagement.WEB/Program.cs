@@ -73,10 +73,10 @@ namespace InventoryManagement.WEB {
             builder.Services.AddScoped<TransactionService>();
 
             builder.Services.AddScoped<IAuth0Repository, Auth0Repository>();
-            builder.Services.AddScoped<Auth0Service>();
+            builder.Services.AddScoped<IAuth0Service, Auth0Service>();
 
             builder.Services.AddScoped<IAccountRepository, AccountRepository>();
-            builder.Services.AddScoped<AccountService>();
+            builder.Services.AddScoped<IAccountService, AccountService>();
 
             builder.Services.AddScoped<ReportService>();
 

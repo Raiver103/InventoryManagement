@@ -63,7 +63,8 @@ namespace InventoryManagement.Tests.Tests.Controllers
             context.Database.EnsureCreated();
             context.Locations.AddRange(
                 new Location { Id = 1, Name = "Warehouse A", Address = "123 Main St" },
-                new Location { Id = 2, Name = "Warehouse B", Address = "456 Side St" }
+                new Location { Id = 2, Name = "Warehouse B", Address = "456 Side St" }, 
+                new Location { Id = 3, Name = "Warehouse C", Address = "666 Side St" }
             );
             context.SaveChanges();
         }
@@ -79,7 +80,7 @@ namespace InventoryManagement.Tests.Tests.Controllers
             var content = await response.Content.ReadAsStringAsync();
             var locations = JsonConvert.DeserializeObject<IEnumerable<Location>>(content);
 
-            Assert.Equal(2, locations.Count());
+            Assert.Equal(3, locations.Count());
         }
 
         [Fact]

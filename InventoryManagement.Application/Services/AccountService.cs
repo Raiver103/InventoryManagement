@@ -5,13 +5,13 @@ using System.Security.Claims;
 
 namespace InventoryManagement.Application.Services
 {
-    public class AccountService
+    public class AccountService : IAccountService
     {
         private readonly IAccountRepository _accountRepository;
         private readonly IAuth0Repository _auth0Repository;
         private readonly IUserService _userService;
 
-        public AccountService(IAccountRepository accountRepository, IAuth0Repository auth0Repository, IUserService userService)
+        public AccountService(IAccountRepository accountRepository, IAuth0Repository auth0Repository, IUserService userService) 
         {
             _accountRepository = accountRepository;
             _auth0Repository = auth0Repository;

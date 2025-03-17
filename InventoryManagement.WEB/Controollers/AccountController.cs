@@ -17,14 +17,15 @@ using System.Text;
 using Infrastructure.Repositories;
 using InventoryManagement.Domain.Interfaces;
 using InventoryManagement.Application.Models.Auth0;
+using InventoryManagement.Application.Interfaces;
 
 namespace InventoryManagement.WEB.Controollers
 {
     public class AccountController : Controller
     {
-        private readonly AccountService _accountService;
+        private readonly IAccountService _accountService;
 
-        public AccountController(AccountService accountService)
+        public AccountController(IAccountService accountService)
         {
             _accountService = accountService;
         }

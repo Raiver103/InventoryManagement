@@ -11,14 +11,15 @@ using InventoryManagement.Infastructure.Persistence;
 using BCrypt.Net;
 using Azure.Core;
 using InventoryManagement.Domain.Entities.Auth0;
+using InventoryManagement.Application.Interfaces;
 
 [Route("api/auth0")]
 [ApiController]
 public class Auth0Controller : ControllerBase
 {
-    private readonly Auth0Service _auth0Service;
+    private readonly IAuth0Service _auth0Service;
 
-    public Auth0Controller(Auth0Service auth0Service)
+    public Auth0Controller(IAuth0Service auth0Service)
     {
         _auth0Service = auth0Service;
     }
@@ -40,7 +41,7 @@ public class Auth0Controller : ControllerBase
     public async Task<IActionResult> UpdateUser(string userId, [FromBody] UpdateUserRequest request)
     {
         var user = await _auth0Service.UpdateUserAsync(userId, request);
-        return Ok(new { message = "Пользователь успешно обновлен", user });
+        return Ok(user);
     }
 
     [HttpGet("get-users")]
@@ -63,6 +64,6 @@ public class Auth0Controller : ControllerBase
     public async Task<IActionResult> DeleteUser(string userId)
     {
         await _auth0Service.DeleteUserAsync(userId);
-        return Ok(new { message = "Пользователь успешно удален" });
+        return NoContent();
     }
 }
