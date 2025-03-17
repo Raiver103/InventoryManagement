@@ -9,7 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace InventoryManagement.Tests.Tests.Controllers
+namespace InventoryManagement.Tests.IntegrationTests.Controllers
 {
     [Collection("Sequential")]
     public class Auth0ControllerTests
@@ -98,4 +98,4 @@ namespace InventoryManagement.Tests.Tests.Controllers
             _auth0ServiceMock.Verify(service => service.DeleteUserAsync("123"), Times.Once);
         }
     }
-} 
+}

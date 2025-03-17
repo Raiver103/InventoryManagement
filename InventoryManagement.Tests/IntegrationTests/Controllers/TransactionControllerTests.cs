@@ -3,12 +3,12 @@ using InventoryManagement.Infastructure.Persistence;
 using InventoryManagement.WEB;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection; 
+using Microsoft.Extensions.DependencyInjection;
 using System.Net.Http.Json;
 using System.Net;
 using Newtonsoft.Json;
 
-namespace InventoryManagement.Tests.Tests.Controllers
+namespace InventoryManagement.Tests.IntegrationTests.Controllers
 {
     [Collection("Sequential")]
     public class TransactionControllerTests : IClassFixture<WebApplicationFactory<Program>>
@@ -55,7 +55,7 @@ namespace InventoryManagement.Tests.Tests.Controllers
 
             var item = new Item { Id = 1, Name = "Test Item", Quantity = 10, Category = "Test Category", LocationId = 1 };
             context.Items.Add(item);
-            var user = new User 
+            var user = new User
             { Id = "1", FirstName = "Test FirstName", LastName = "Test LastName", Email = "Test Email", Role = "Test Role", PasswordHash = "TestPasswordHash" };
             context.Users.Add(user);
             context.Locations.AddRange(

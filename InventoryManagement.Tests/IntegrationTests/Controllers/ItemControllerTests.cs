@@ -8,7 +8,7 @@ using Newtonsoft.Json;
 using System.Net.Http.Json;
 using System.Net;
 
-namespace InventoryManagement.Tests.Tests.Controllers
+namespace InventoryManagement.Tests.IntegrationTests.Controllers
 {
     [Collection("Sequential")]
     public class ItemControllerTests : IClassFixture<WebApplicationFactory<Program>>

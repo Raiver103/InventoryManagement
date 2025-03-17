@@ -13,7 +13,7 @@ using System.Net.Http.Json;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace InventoryManagement.Tests.Tests.Controllers
+namespace InventoryManagement.Tests.IntegrationTests.Controllers
 {
     [Collection("Sequential")]
     public class LocationControllerTests : IClassFixture<WebApplicationFactory<Program>>
@@ -63,7 +63,7 @@ namespace InventoryManagement.Tests.Tests.Controllers
             context.Database.EnsureCreated();
             context.Locations.AddRange(
                 new Location { Id = 1, Name = "Warehouse A", Address = "123 Main St" },
-                new Location { Id = 2, Name = "Warehouse B", Address = "456 Side St" }, 
+                new Location { Id = 2, Name = "Warehouse B", Address = "456 Side St" },
                 new Location { Id = 3, Name = "Warehouse C", Address = "666 Side St" }
             );
             context.SaveChanges();

@@ -9,7 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace InventoryManagement.Tests
+namespace InventoryManagement.Tests.UnitTests.Services
 {
     public class TransactionServiceTests
     {
@@ -140,7 +140,7 @@ namespace InventoryManagement.Tests
             var act = async () => await _transactionService.AddTransaction(transaction);
 
             // Assert
-            await act.Should().ThrowAsync<System.Exception>().WithMessage("Item not found.");
+            await act.Should().ThrowAsync<Exception>().WithMessage("Item not found.");
             _transactionRepositoryMock.Verify(repo => repo.AddAsync(It.IsAny<Transaction>()), Times.Never);
         }
 
@@ -169,7 +169,7 @@ namespace InventoryManagement.Tests
             var act = async () => await _transactionService.AddTransaction(transaction);
 
             // Assert
-            await act.Should().ThrowAsync<System.Exception>().WithMessage("Location not found.");
+            await act.Should().ThrowAsync<Exception>().WithMessage("Location not found.");
             _transactionRepositoryMock.Verify(repo => repo.AddAsync(It.IsAny<Transaction>()), Times.Never);
         }
     }

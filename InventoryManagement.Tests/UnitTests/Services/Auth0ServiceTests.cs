@@ -10,7 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using InventoryManagement.Application.Interfaces;
 
-namespace InventoryManagement.Tests
+namespace InventoryManagement.Tests.UnitTests.Services
 {
     public class Auth0ServiceTests
     {

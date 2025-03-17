@@ -9,7 +9,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace InventoryManagement.Tests
+namespace InventoryManagement.Tests.UnitTests.Services
 {
     public class AccountServiceTests
     {
@@ -32,13 +32,13 @@ namespace InventoryManagement.Tests
             // Arrange
             var userId = "test-user-id";
             var claims = new List<Claim>
-        {
-            new Claim(ClaimTypes.NameIdentifier, userId),
-            new Claim("nickname", "test@example.com"),
-            new Claim("https://your-app.com/first_name", "John"),
-            new Claim("https://your-app.com/last_name", "Doe"),
-            new Claim("sid", "hashed-password")
-        };
+            {
+                new Claim(ClaimTypes.NameIdentifier, userId),
+                new Claim("nickname", "test@example.com"),
+                new Claim("https://your-app.com/first_name", "John"),
+                new Claim("https://your-app.com/last_name", "Doe"),
+                new Claim("sid", "hashed-password")
+            };
             var claimsPrincipal = new ClaimsPrincipal(new ClaimsIdentity(claims, "mock"));
             _userServiceMock.Setup(us => us.GetUserById(userId)).ReturnsAsync((User)null);
 

@@ -15,7 +15,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace InventoryManagement.Tests.Tests.Controllers
+namespace InventoryManagement.Tests.IntegrationTests.Controllers
 {
     [Collection("Sequential")]
     public class AccountControllerTests
@@ -70,7 +70,7 @@ namespace InventoryManagement.Tests.Tests.Controllers
             _controller.Url = urlHelperMock.Object;
 
             var services = new ServiceCollection();
-            services.AddSingleton(Mock.Of<IAuthenticationService>()); 
+            services.AddSingleton(Mock.Of<IAuthenticationService>());
             httpContext.RequestServices = services.BuildServiceProvider();
 
             // Act

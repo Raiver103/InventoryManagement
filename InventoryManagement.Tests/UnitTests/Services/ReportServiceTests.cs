@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace InventoryManagement.Tests
+namespace InventoryManagement.Tests.UnitTests.Services
 {
     public class ReportServiceTests
     {
