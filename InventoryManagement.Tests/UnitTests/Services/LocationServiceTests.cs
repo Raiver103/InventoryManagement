@@ -65,11 +65,8 @@ namespace InventoryManagement.Tests.UnitTests.Services
             _locationRepositoryMock.Setup(repo => repo.GetByIdAsync(It.IsAny<int>()))
                 .ReturnsAsync((Location)null);
 
-            // Act
-            var result = await _locationService.GetLocationById(999);
-
-            // Assert
-            result.Should().BeNull();
+            // Act & Assert
+            await Assert.ThrowsAsync<KeyNotFoundException>(() => _locationService.GetLocationById(999));
         }
 
         [Fact]

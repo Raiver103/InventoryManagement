@@ -6,7 +6,7 @@ using InventoryManagement.Infastructure.Hubs;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 
-namespace InventoryManagement.WEB.Controollers
+namespace InventoryManagement.WEB.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]

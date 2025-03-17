@@ -38,11 +38,15 @@ namespace InventoryManagement.WEB.Controollers
         [HttpGet("{id}")]
         public async Task<IActionResult> Get(int id)
         {
-            var transaction = await _transactionService.GetTransactionById(id);
-            if (transaction == null)
-                return NotFound();
-
-            return Ok(_mapper.Map<TransactionResponseDTO>(transaction));
+            try
+            {
+                var transaction = await _transactionService.GetTransactionById(id);
+                return Ok(_mapper.Map<TransactionResponseDTO>(transaction));
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { error = ex.Message });
+            }
         }
 
         [HttpPost]
@@ -59,7 +63,7 @@ namespace InventoryManagement.WEB.Controollers
                 await _hubContext.Clients.All.SendAsync("ReceiveUpdate", createdTransactionDto);
                 return CreatedAtAction(nameof(Get), new { id = createdTransaction.Id }, createdTransactionDto);
             }
-            catch (ArgumentException ex)  // ❗ Обрабатываем ошибки валидации
+            catch (ArgumentException ex)  
             {
                 return BadRequest(new { error = ex.Message });
             }
@@ -68,8 +72,5 @@ namespace InventoryManagement.WEB.Controollers
                 return StatusCode(500, new { error = "Internal Server Error", details = ex.Message });
             }
         }
-
-
-
     }
 }

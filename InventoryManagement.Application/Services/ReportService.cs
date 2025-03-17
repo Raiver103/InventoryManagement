@@ -48,7 +48,7 @@ namespace InventoryManagement.Application.Services
                     : "0001-01-01 00:00:00.0000000";
 
                 worksheet.Cell(row, 6).SetValue(timestampStr);
-                worksheet.Cell(row, 6).Style.NumberFormat.Format = "@"; // Устанавливаем текстовый формат
+                worksheet.Cell(row, 6).Style.NumberFormat.Format = "@"; 
 
                 row++;
             }

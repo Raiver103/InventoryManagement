@@ -19,11 +19,7 @@ namespace InventoryManagement.Application.Services
             _transactionRepository = transactionRepository;
             _itemRepository = itemRepository;
             _locationRepository = locationRepository;
-        }
-
-        public TransactionService()
-        {
-        }
+        } 
 
         public async Task<IEnumerable<Transaction>> GetAllTransactions()
         {
@@ -32,25 +28,16 @@ namespace InventoryManagement.Application.Services
 
         public async Task<Transaction> GetTransactionById(int id)
         {
-            return await _transactionRepository.GetByIdAsync(id);
+            return await _transactionRepository.GetByIdAsync(id)
+                ?? throw new KeyNotFoundException($"Transaction с ID {id} не найдена.");
         }
 
         public async Task<Transaction> AddTransaction(TransactionCreateDTO transactionCreateDto)
         {
-            var item = await _itemRepository.GetByIdAsync(transactionCreateDto.ItemId);
-            if (item == null)
-                throw new ArgumentException("Item not found."); // ⚠️ Меняем на ArgumentException
+            var item = await _itemRepository.GetByIdAsync(transactionCreateDto.ItemId)
+                ?? throw new ArgumentException("Item not found.");
 
-            if (item.LocationId != transactionCreateDto.FromLocationId)
-                throw new ArgumentException("Item's current location does not match FromLocationId.");
-
-            if (transactionCreateDto.FromLocationId == transactionCreateDto.ToLocationId)
-                throw new ArgumentException("Item cannot be moved to the same location."); // ⚠️ Тут тоже
-
-            var fromLocation = await _locationRepository.GetByIdAsync(transactionCreateDto.FromLocationId);
-            var toLocation = await _locationRepository.GetByIdAsync(transactionCreateDto.ToLocationId);
-            if (fromLocation == null || toLocation == null)
-                throw new ArgumentException("Invalid locations.");
+            await ValidateTransaction(transactionCreateDto, item); 
 
             var transaction = new Transaction
             {
@@ -66,6 +53,20 @@ namespace InventoryManagement.Application.Services
             await _transactionRepository.AddAsync(transaction);
 
             return transaction;
+        }
+
+        private async Task ValidateTransaction(TransactionCreateDTO transactionCreateDto, Item item )
+        { 
+            if (item.LocationId != transactionCreateDto.FromLocationId)
+                throw new ArgumentException("Item's current location does not match FromLocationId.");
+
+            if (transactionCreateDto.FromLocationId == transactionCreateDto.ToLocationId)
+                throw new ArgumentException("Item cannot be moved to the same location.");
+
+            var fromLocation = await _locationRepository.GetByIdAsync(transactionCreateDto.FromLocationId);
+            var toLocation = await _locationRepository.GetByIdAsync(transactionCreateDto.ToLocationId);
+            if (fromLocation == null || toLocation == null)
+                throw new ArgumentException("Invalid locations.");
         }
 
     }

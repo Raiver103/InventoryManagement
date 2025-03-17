@@ -22,12 +22,10 @@ namespace InventoryManagement.Infastructure.Repositories
 
         public async Task DeleteAsync(int id)
         {
-            var location = await GetByIdAsync(id);
-            if (location != null)
-            {
-                _context.Locations.Remove(location);
-                await _context.SaveChangesAsync();
-            }
+            var location = await GetByIdAsync(id) 
+                ?? throw new KeyNotFoundException($"Location с ID {id} не найден.");
+            _context.Locations.Remove(location);
+            await _context.SaveChangesAsync();
         }
 
         public async Task<IEnumerable<Location>> GetAllAsync()

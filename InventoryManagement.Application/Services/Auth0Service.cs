@@ -62,7 +62,14 @@ public class Auth0Service : IAuth0Service
 
     public async Task DeleteUserAsync(string userId)
     {
-        await _auth0Repository.DeleteUserAsync(userId);
-        await _userRepository.DeleteAsync(userId);
+        try
+        {
+            await _userRepository.DeleteAsync(userId); // 🛑 Сначала пытаемся удалить из БД
+            await _auth0Repository.DeleteUserAsync(userId); // ✅ Если удаление в БД успешно, удаляем в Auth0
+        }
+        catch (Exception ex)
+        {
+            throw new Exception($"Ошибка при удалении пользователя из БД: {ex.Message}", ex);
+        }
     }
 }

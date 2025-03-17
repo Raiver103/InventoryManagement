@@ -68,17 +68,14 @@ namespace InventoryManagement.Tests.UnitTests.Services
         }
 
         [Fact]
-        public async Task GetTransactionById_ShouldReturnNull_WhenTransactionDoesNotExist()
+        public async Task GetTransactionById_ShouldThrowKeyNotFoundException_WhenTransactionDoesNotExist()
         {
             // Arrange
             _transactionRepositoryMock.Setup(repo => repo.GetByIdAsync(It.IsAny<int>()))
                 .ReturnsAsync((Transaction)null);
 
-            // Act
-            var result = await _transactionService.GetTransactionById(999);
-
-            // Assert
-            result.Should().BeNull();
+            // Act & Assert
+            await Assert.ThrowsAsync<KeyNotFoundException>(() => _transactionService.GetTransactionById(999));
         }
 
         [Fact]

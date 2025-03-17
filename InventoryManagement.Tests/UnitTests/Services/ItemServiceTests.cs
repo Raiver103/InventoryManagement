@@ -59,17 +59,14 @@ namespace InventoryManagement.Tests.UnitTests.Services
         }
 
         [Fact]
-        public async Task GetItemById_ShouldReturnNull_WhenItemDoesNotExist()
+        public async Task GetItemById_ShouldThrowKeyNotFoundException_WhenItemDoesNotExist()
         {
             // Arrange
             _itemRepositoryMock.Setup(repo => repo.GetByIdAsync(It.IsAny<int>()))
                 .ReturnsAsync((Item)null);
 
-            // Act
-            var result = await _itemService.GetItemById(999);
-
-            // Assert
-            result.Should().BeNull();
+            // Act & Assert
+            await Assert.ThrowsAsync<KeyNotFoundException>(() => _itemService.GetItemById(999));
         }
 
         [Fact]

@@ -9,13 +9,13 @@ namespace InventoryManagement.Application.Services
     {
         private readonly IAccountRepository _accountRepository;
         private readonly IAuth0Repository _auth0Repository;
-        private readonly IUserService _userService;
+        private readonly IUserRepository _userRepository;
 
-        public AccountService(IAccountRepository accountRepository, IAuth0Repository auth0Repository, IUserService userService) 
+        public AccountService(IAccountRepository accountRepository, IAuth0Repository auth0Repository, IUserRepository userRepository) 
         {
             _accountRepository = accountRepository;
             _auth0Repository = auth0Repository;
-            _userService = userService;
+            _userRepository = userRepository;
         }
 
         public async Task SyncUserAsync(ClaimsPrincipal user)
@@ -32,7 +32,7 @@ namespace InventoryManagement.Application.Services
             var lastName = user.FindFirst("https://your-app.com/last_name")?.Value ?? "Не указано";
             var password = user.FindFirst(c => c.Type == "sid")?.Value ?? "Не указано";
 
-            var existingUser = await _userService.GetUserById(userId);
+            var existingUser = await _userRepository.GetByIdAsync(userId);
 
             if (existingUser == null)
             {
@@ -46,7 +46,7 @@ namespace InventoryManagement.Application.Services
                     PasswordHash = password
                 };
 
-                await _userService.AddUser(newUser);
+                await _userRepository.AddAsync(newUser);
             }
         }
 

@@ -20,7 +20,8 @@ namespace InventoryManagement.Application.Services
 
         public async Task<Location> GetLocationById(int id)
         {
-            return await _locationRepository.GetByIdAsync(id);
+            return await _locationRepository.GetByIdAsync(id) 
+                ?? throw new KeyNotFoundException($"Location с ID {id} не найден.");
         }
 
         public async Task AddLocation(Location item)

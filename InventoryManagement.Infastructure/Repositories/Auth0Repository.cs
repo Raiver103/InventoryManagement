@@ -176,14 +176,9 @@ namespace Infrastructure.Repositories
 
         public string GetRoleId(string roleName)
         {
-            var roles = new Dictionary<string, string>
-            {
-                { "Admin", "rol_6JJSMFRpkvMKUCr8" },
-                { "Employee", "rol_1zXKaYdC0yYkur5R" },
-                { "Manager", "rol_MroJU4loFATOSJTp" }
-            };
-
-            return roles.ContainsKey(roleName) ? roles[roleName] : null;
+            var rolesSection = _config.GetSection("Auth0Roles");
+            var roles = rolesSection.GetChildren().ToDictionary(x => x.Key, x => x.Value);
+            return roles.TryGetValue(roleName, out var roleId) ? roleId : null;
         }
     }
 }

@@ -10,15 +10,15 @@ namespace InventoryManagement.Tests.UnitTests.Services
     {
         private readonly Mock<IAccountRepository> _accountRepositoryMock;
         private readonly Mock<IAuth0Repository> _auth0RepositoryMock;
-        private readonly Mock<UserService> _userServiceMock;
+        private readonly Mock<IUserRepository> _userRepositoryMock;
         private readonly AccountService _accountService;
 
         public AccountServiceTests()
         {
             _accountRepositoryMock = new Mock<IAccountRepository>();
             _auth0RepositoryMock = new Mock<IAuth0Repository>();
-            _userServiceMock = new Mock<UserService>(Mock.Of<IUserRepository>());
-            _accountService = new AccountService(_accountRepositoryMock.Object, _auth0RepositoryMock.Object, _userServiceMock.Object);
+            _userRepositoryMock = new Mock<IUserRepository>();
+            _accountService = new AccountService(_accountRepositoryMock.Object, _auth0RepositoryMock.Object, _userRepositoryMock.Object);
         }
 
         [Fact]
@@ -35,13 +35,13 @@ namespace InventoryManagement.Tests.UnitTests.Services
                 new Claim("sid", "hashed-password")
             };
             var claimsPrincipal = new ClaimsPrincipal(new ClaimsIdentity(claims, "mock"));
-            _userServiceMock.Setup(us => us.GetUserById(userId)).ReturnsAsync((User)null);
+            _userRepositoryMock.Setup(us => us.GetByIdAsync(userId)).ReturnsAsync((User)null);
 
             // Act
             await _accountService.SyncUserAsync(claimsPrincipal);
 
             // Assert
-            _userServiceMock.Verify(us => us.AddUser(It.IsAny<User>()), Times.Once);
+            _userRepositoryMock.Verify(us => us.AddAsync(It.IsAny<User>()), Times.Once);
         }
 
         [Fact]
@@ -50,13 +50,13 @@ namespace InventoryManagement.Tests.UnitTests.Services
             // Arrange
             var userId = "test-user-id";
             var claimsPrincipal = new ClaimsPrincipal(new ClaimsIdentity(new[] { new Claim(ClaimTypes.NameIdentifier, userId) }, "mock"));
-            _userServiceMock.Setup(us => us.GetUserById(userId)).ReturnsAsync(new User { Id = userId });
+            _userRepositoryMock.Setup(us => us.GetByIdAsync(userId)).ReturnsAsync(new User { Id = userId });
 
             // Act
             await _accountService.SyncUserAsync(claimsPrincipal);
 
             // Assert
-            _userServiceMock.Verify(us => us.AddUser(It.IsAny<User>()), Times.Never);
+            _userRepositoryMock.Verify(us => us.AddAsync(It.IsAny<User>()), Times.Never);
         }
 
         [Fact]

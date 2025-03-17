@@ -20,7 +20,8 @@ namespace InventoryManagement.Application.Services
 
         public async Task<Item> GetItemById(int id)
         {
-            return await _itemRepository.GetByIdAsync(id);
+            return await _itemRepository.GetByIdAsync(id) 
+                ?? throw new KeyNotFoundException($"Item с ID {id} не найден.");
         }
 
         public async Task AddItem(Item item)
