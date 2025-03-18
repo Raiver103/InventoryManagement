@@ -119,7 +119,23 @@ namespace InventoryManagement.Tests.IntegrationTests.Controllers
         [Fact]
         public async Task UpdateLocation_ShouldReturnNotFound_WhenNotExists()
         {
-            var updatedLocation = new
-            {
-                Name = "Nonexistent Warehouse",
-                Address = "Nowhere
+            var updatedLocation = new { Name = "Nonexistent Warehouse", Address = "Nowhere" };
+            var response = await _client.PutAsJsonAsync("/api/location/999", updatedLocation);
+            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        }
+
+        [Fact]
+        public async Task DeleteLocation_ShouldReturnNoContent_WhenExists()
+        {
+            var response = await _client.DeleteAsync("/api/location/1");
+            Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+        }
+
+        [Fact]
+        public async Task DeleteLocation_ShouldReturnNotFound_WhenNotExists()
+        {
+            var response = await _client.DeleteAsync("/api/location/999");
+            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        }
+    }
+}
