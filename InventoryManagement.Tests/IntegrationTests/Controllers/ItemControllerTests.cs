@@ -1,4 +1,4 @@
-﻿using InventoryManagement.Domain.Entities; 
+﻿using InventoryManagement.Domain.Entities;
 using InventoryManagement.WEB;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
@@ -7,45 +7,41 @@ using Newtonsoft.Json;
 using System.Net.Http.Json;
 using System.Net;
 using InventoryManagement.Infrastructure.Persistence;
+using Microsoft.Data.SqlClient;
 
 namespace InventoryManagement.Tests.IntegrationTests.Controllers
 {
     [Collection("Sequential")]
-    public class ItemControllerTests : IClassFixture<WebApplicationFactory<Program>>, IClassFixture<SqlServerFixture>
+    public class ItemControllerTests : IClassFixture<WebApplicationFactory<Program>>
     {
         private readonly HttpClient _client;
         private readonly WebApplicationFactory<Program> _factory;
-        private readonly string _connectionString;
+        private readonly string _connectionString = "Data Source=RAIVER\\MSSQLSERVER103;Initial Catalog=InventoryManagement.Tests;Integrated Security=True;Connect Timeout=30;Encrypt=False;Trust Server Certificate=False;Application Intent=ReadWrite;Multi Subnet Failover=False";
 
-        public ItemControllerTests(WebApplicationFactory<Program> factory, SqlServerFixture sqlFixture)
+        public ItemControllerTests(WebApplicationFactory<Program> factory)
         {
-            _connectionString = sqlFixture.ConnectionString;
-
             _factory = factory.WithWebHostBuilder(builder =>
             {
                 builder.ConfigureServices(services =>
                 {
-                    // Удаляем существующую конфигурацию контекста
-                    var descriptor = services.SingleOrDefault(
-                        d => d.ServiceType == typeof(DbContextOptions<AppDbContext>));
-
+                    // Удаляем старый контекст, если он уже зарегистрирован
+                    var descriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<AppDbContext>));
                     if (descriptor != null)
                     {
                         services.Remove(descriptor);
                     }
 
-                    // Добавляем контекст с реальной базой данных
+                    // Добавляем новый SQL Server контекст
                     services.AddDbContext<AppDbContext>(options =>
                         options.UseSqlServer(_connectionString));
 
-                    // Создаем новый scope и заполняем базу тестовыми данными
+                    // Создаем новый scope и заполняем БД тестовыми данными
                     var sp = services.BuildServiceProvider();
                     using (var scope = sp.CreateScope())
                     {
-                        var scopedServices = scope.ServiceProvider;
-                        var context = scopedServices.GetRequiredService<AppDbContext>();
-                        context.Database.EnsureDeleted(); // Удаляем предыдущую БД, если есть
-                        context.Database.EnsureCreated(); // Создаем новую БД
+                        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+                        context.Database.EnsureDeleted();  // Удаляем БД перед тестами
+                        context.Database.EnsureCreated();  // Создаем новую
                         SeedTestData(context);
                     }
                 });
@@ -56,20 +52,39 @@ namespace InventoryManagement.Tests.IntegrationTests.Controllers
 
         private void SeedTestData(AppDbContext context)
         {
-            context.Items.AddRange(
-                new Item { Id = 1, Name = "Test Item 1", Quantity = 10, Category = "Test Category 1" },
-                new Item { Id = 2, Name = "Test Item 2", Quantity = 20, Category = "Test Category 2" }
-            );
+            context.Database.EnsureDeleted(); // Удаляем старую БД
+            context.Database.EnsureCreated(); // Создаем новую
+
+            // ✅ Создаем Locations БЕЗ указания Id (SQL Server сам присвоит значения)
+            var locations = new List<Location>
+    {
+        new Location { Name = "Warehouse A", Address = "123 Main St" },
+        new Location { Name = "Warehouse B", Address = "456 Side St" }
+    };
+
+            context.Locations.AddRange(locations);
+            context.SaveChanges();
+
+            // ✅ Получаем ID, которые были сгенерированы
+            var locationA = context.Locations.FirstOrDefault(l => l.Name == "Warehouse A");
+            var locationB = context.Locations.FirstOrDefault(l => l.Name == "Warehouse B");
+
+            // ✅ Теперь создаем Items, указывая корректный LocationId
+            var items = new List<Item>
+    {
+        new Item { Name = "Test Item 1", Quantity = 10, Category = "Test Category 1", LocationId = locationA.Id },
+        new Item { Name = "Test Item 2", Quantity = 20, Category = "Test Category 2", LocationId = locationB.Id }
+    };
+
+            context.Items.AddRange(items);
             context.SaveChanges();
         }
+
 
         [Fact]
         public async Task GetAllItems_ShouldReturnAllItems()
         {
-            // Act
             var response = await _client.GetAsync("/api/item");
-
-            // Assert
             response.EnsureSuccessStatusCode();
             var content = await response.Content.ReadAsStringAsync();
             var items = JsonConvert.DeserializeObject<IEnumerable<Item>>(content);
@@ -79,33 +94,26 @@ namespace InventoryManagement.Tests.IntegrationTests.Controllers
         [Fact]
         public async Task GetItemById_ShouldReturnItem_WhenItemExists()
         {
-            // Act
             var response = await _client.GetAsync("/api/item/1");
-
-            // Проверяем статус ответа
             response.EnsureSuccessStatusCode();
             var content = await response.Content.ReadAsStringAsync();
-
-            // Логирование ответа для отладки
-            Console.WriteLine($"Response content: {content}");
-
-            // Десериализация JSON
             var item = JsonConvert.DeserializeObject<Item>(content);
-
-            // Assert
             Assert.NotNull(item);
             Assert.Equal(1, item.Id);
         }
+
         [Fact]
         public async Task CreateItem_ShouldReturnCreatedItem()
         {
-            // Arrange
-            var newItem = new { Name = "New Item", Quantity = 5, Category = "Test Category" };
+            var newItem = new
+            {
+                Name = "New Item",
+                Quantity = 5,
+                Category = "Test Category",
+                LocationId = 1  // Добавляем LocationId
+            };
 
-            // Act
             var response = await _client.PostAsJsonAsync("/api/item", newItem);
-
-            // Assert
             response.EnsureSuccessStatusCode();
             var content = await response.Content.ReadAsStringAsync();
             var createdItem = JsonConvert.DeserializeObject<Item>(content);
@@ -117,25 +125,16 @@ namespace InventoryManagement.Tests.IntegrationTests.Controllers
         [Fact]
         public async Task UpdateItem_ShouldReturnNoContent()
         {
-            // Arrange
-            var updatedItem = new { Name = "Updated Item", Quantity = 99, Category = "Updated Category" };
-
-            // Act
+            var updatedItem = new { Name = "Updated Item", Quantity = 99, Category = "Updated Category", LocationId = 1 };
             var response = await _client.PutAsJsonAsync("/api/item/1", updatedItem);
-
-            // Assert
             Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
         }
 
         [Fact]
         public async Task DeleteItem_ShouldReturnNoContent()
         {
-            // Act
             var response = await _client.DeleteAsync("/api/item/1");
-
-            // Assert
             Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
         }
-
     }
 }
