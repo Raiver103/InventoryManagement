@@ -139,3 +139,4 @@ namespace InventoryManagement.Tests.IntegrationTests.Controllers
         }
     }
 }
+ 
