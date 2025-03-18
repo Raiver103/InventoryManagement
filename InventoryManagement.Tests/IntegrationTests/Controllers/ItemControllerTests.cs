@@ -50,25 +50,30 @@ namespace InventoryManagement.Tests.IntegrationTests.Controllers
         private void SeedTestData(AppDbContext context)
         {
             context.Items.RemoveRange(context.Items);
-            context.Locations.RemoveRange(context.Locations); // Очищаем таблицу Locations
+            context.Locations.RemoveRange(context.Locations);
             context.SaveChanges();
 
-            // ✅ 1. Добавляем тестовые локации
+            // ✅ 1. Добавляем тестовые локации (убираем Id)
             var locations = new List<Location>
-            {
-                new Location { Id = 1, Name = "Warehouse A" },
-                new Location { Id = 2, Name = "Warehouse B" }
-            };
+    {
+        new Location { Name = "Warehouse A" },
+        new Location { Name = "Warehouse B" }
+    };
             context.Locations.AddRange(locations);
             context.SaveChanges();
 
-            // ✅ 2. Добавляем тестовые товары, указывая `LocationId`
+            // ✅ 2. Получаем реальные `Id`, сгенерированные БД
+            int locationId1 = locations[0].Id;
+            int locationId2 = locations[1].Id;
+
+            // ✅ 3. Добавляем тестовые товары, указывая `LocationId`
             context.Items.AddRange(
-                new Item { Name = "Test Item 1", Quantity = 10, Category = "Test Category 1", LocationId = 1 },
-                new Item { Name = "Test Item 2", Quantity = 20, Category = "Test Category 2", LocationId = 2 }
+                new Item { Name = "Test Item 1", Quantity = 10, Category = "Test Category 1", LocationId = locationId1 },
+                new Item { Name = "Test Item 2", Quantity = 20, Category = "Test Category 2", LocationId = locationId2 }
             );
             context.SaveChanges();
         }
+
 
         [Fact]
         public async Task GetAllItems_ShouldReturnAllItems()
