@@ -22,10 +22,7 @@ services:
     depends_on:
       - sqlserver
     environment:
-      ConnectionStrings__DefaultConnection: "Data Source=RAIVER\\MSSQLSERVER103;Initial Catalog=InventoryManagement;Integrated Security=True;Connect Timeout=30;Encrypt=False;Trust Server Certificate=False;Application Intent=ReadWrite;Multi Subnet Failover=False"
-    
+      ConnectionStrings__DefaultConnection: "Server=inventory_db,1433;Database=InventoryManagement;User Id=sa;Password=Strong!Password@123;TrustServerCertificate=True;"
+
 volumes:
   sqlserver_data:
-
-
-  
