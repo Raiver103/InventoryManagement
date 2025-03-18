@@ -56,8 +56,8 @@ namespace InventoryManagement.Tests.IntegrationTests.Controllers
             // ✅ 1. Добавляем тестовые локации (убираем Id)
             var locations = new List<Location>
     {
-        new Location { Name = "Warehouse A" },
-        new Location { Name = "Warehouse B" }
+        new Location { Name = "Warehouse A", Address = "ывыв" },
+        new Location { Name = "Warehouse B", Address = "ывыв" }
     };
             context.Locations.AddRange(locations);
             context.SaveChanges();
