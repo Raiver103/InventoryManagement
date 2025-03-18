@@ -66,4 +66,4 @@ jobs:
             docker pull ${{ secrets.DOCKER_USERNAME }}/inventory-management:latest
             docker stop inventory_api || true
             docker rm inventory_api || true
-            docker run -d -p 5000:5000 --name inventory_api --env-file .env ${{ secrets.DOCKER_USERNAME }}/inventory-management:latest
+            docker run -d -p 5000:8080 --name inventory_api --env-file .env ${{ secrets.DOCKER_USERNAME }}/inventory-management:latest
