@@ -4,31 +4,37 @@ using Testcontainers.MsSql;
 
 namespace InventoryManagement.Tests
 {
-    public class SqlServerFixture : IDisposable
+    public class SqlServerFixture : IAsyncLifetime
     {
-        public string ConnectionString { get; }
+        public MsSqlContainer DbContainer { get; } = new MsSqlBuilder()
+            .WithImage("mcr.microsoft.com/mssql/server:2022-latest")
+            .WithPassword("Strong!Password@123")
+            .WithEnvironment("ACCEPT_EULA", "Y")
+            .Build();
 
-        public SqlServerFixture()
+        public string ConnectionString => $"{DbContainer.GetConnectionString()};Database=TestInventoryManagement";
+
+        public async Task InitializeAsync()
         {
-            ConnectionString = "Server=localhost,1433;Database=TestDb;User Id=sa;Password=YourPassword;TrustServerCertificate=True;";
-            EnsureDatabaseCreated();
+            await DbContainer.StartAsync();
+
+            var masterConnectionString = $"{DbContainer.GetConnectionString()};Database=master";
+
+            using var connection = new SqlConnection(masterConnectionString);
+            await connection.OpenAsync();
+
+            using var command = connection.CreateCommand();
+            command.CommandText = @"
+                IF NOT EXISTS (SELECT name FROM sys.databases WHERE name = 'TestInventoryManagement')
+                BEGIN
+                    CREATE DATABASE TestInventoryManagement;
+                END";
+            await command.ExecuteNonQueryAsync();
         }
 
-        private void EnsureDatabaseCreated()
+        public async Task DisposeAsync()
         {
-            using var connection = new SqlConnection(ConnectionString);
-            connection.Open();
-            using var command = new SqlCommand("IF NOT EXISTS (SELECT * FROM sys.databases WHERE name = 'TestDb') CREATE DATABASE TestDb;", connection);
-            command.ExecuteNonQuery();
-        }
-
-        public void Dispose()
-        {
-            using var connection = new SqlConnection(ConnectionString);
-            connection.Open();
-            using var command = new SqlCommand("DROP DATABASE IF EXISTS TestDb;", connection);
-            command.ExecuteNonQuery();
+            await DbContainer.DisposeAsync();
         }
     }
-
 }
