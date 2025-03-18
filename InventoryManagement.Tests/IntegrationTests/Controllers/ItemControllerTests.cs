@@ -22,7 +22,7 @@ namespace InventoryManagement.Tests.IntegrationTests.Controllers
             {
                 builder.ConfigureServices(services =>
                 {
-                    // Удаляем существующую конфигурацию контекста
+                    // Удаляем существующую БД
                     var descriptor = services.SingleOrDefault(
                         d => d.ServiceType == typeof(DbContextOptions<AppDbContext>));
 
@@ -31,19 +31,21 @@ namespace InventoryManagement.Tests.IntegrationTests.Controllers
                         services.Remove(descriptor);
                     }
 
-                    // Добавляем новый InMemoryDatabase
+                    // Добавляем **SQL Server в Docker**
+                    var connectionString = "Server=inventory_db,1433;Database=TestInventoryManagement;User Id=sa;Password=Strong!Password@123;TrustServerCertificate=True;";
+
                     services.AddDbContext<AppDbContext>(options =>
                     {
-                        options.UseInMemoryDatabase("InMemoryDbForTesting");
+                        options.UseSqlServer(connectionString);
                     });
 
-                    // Создаем новый scope и заполняем базу тестовыми данными
+                    // Создаем новый scope и применяем миграции
                     var sp = services.BuildServiceProvider();
                     using (var scope = sp.CreateScope())
                     {
                         var scopedServices = scope.ServiceProvider;
                         var context = scopedServices.GetRequiredService<AppDbContext>();
-                        context.Database.EnsureCreated();
+                        context.Database.EnsureCreated(); // Применяем миграции
                         SeedTestData(context);
                     }
                 });
@@ -54,8 +56,8 @@ namespace InventoryManagement.Tests.IntegrationTests.Controllers
 
         private void SeedTestData(AppDbContext context)
         {
-            context.Database.EnsureDeleted(); // Удаляем предыдущую БД, если есть
-            context.Database.EnsureCreated();
+            context.Database.EnsureDeleted(); // Удаляем старую БД
+            context.Database.EnsureCreated(); // Создаем новую
 
             context.Items.AddRange(
                 new Item { Id = 1, Name = "Test Item 1", Quantity = 10, Category = "Test Category 1" },

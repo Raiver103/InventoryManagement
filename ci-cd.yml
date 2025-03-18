@@ -3,43 +3,43 @@ name: CI/CD Pipeline
 on:
   push:
     branches:
-      - master
+      - master  # Запуск при пуше в main
   pull_request:
     branches:
-      - master
+      - master  # Запуск при PR в main
+  workflow_dispatch:  # Возможность ручного запуска
 
 jobs:
-  build-and-test:
+  test:
+    name: Run Unit Tests
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: "8.0.x"
+          dotnet-version: '8.0'  # Укажи свою версию .NET
 
       - name: Restore Dependencies
         run: dotnet restore
 
-      - name: Build
-        run: dotnet build --configuration Release --no-restore
+      - name: Build Application
+        run: dotnet build --no-restore --configuration Release
 
       - name: Run Tests
-        run: dotnet test --no-restore --verbosity normal
+        run: dotnet test --no-build --configuration Release --logger trx
 
-  docker-build-and-push:
-    needs: build-and-test
+  build:
+    name: Build and Push Docker Image
+    needs: test  # Запуск только если тесты пройдены
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
-
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Login to Docker Hub
+      - name: Log in to Docker Hub
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
@@ -47,23 +47,5 @@ jobs:
 
       - name: Build and Push Docker Image
         run: |
-          docker build -t ${{ secrets.DOCKER_USERNAME }}/inventory-management:latest -f InventoryManagement.API/Dockerfile .
-          docker push ${{ secrets.DOCKER_USERNAME }}/inventory-management:latest
-
-  deploy:
-    needs: docker-build-and-push
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
-
-    steps:
-      - name: Deploy to Server
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          password: ${{ secrets.SERVER_PASSWORD }}
-          script: |
-            docker pull ${{ secrets.DOCKER_USERNAME }}/inventory-management:latest
-            docker stop inventory_api || true
-            docker rm inventory_api || true
-            docker run -d -p 5000:8080 --name inventory_api --env-file .env ${{ secrets.DOCKER_USERNAME }}/inventory-management:latest
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/inventory-api:latest -f InventoryManagement.WEB/Dockerfile .
+          docker push ${{ secrets.DOCKER_USERNAME }}/inventory-api:latest
