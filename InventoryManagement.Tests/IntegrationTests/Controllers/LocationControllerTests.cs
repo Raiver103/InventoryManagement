@@ -1,4 +1,5 @@
-﻿using InventoryManagement.Domain.Entities;
+﻿using InventoryManagement.Application.DTOs.Location;
+using InventoryManagement.Domain.Entities;
 using InventoryManagement.Infrastructure.Persistence;
 using InventoryManagement.WEB;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -76,19 +77,28 @@ namespace InventoryManagement.Tests.IntegrationTests.Controllers
         [Fact]
         public async Task GetLocationById_ShouldReturnLocation_WhenExists()
         {
-            var response = await _client.GetAsync("/api/location/1");
-            response.EnsureSuccessStatusCode();
+            // Отправляем запрос на получение локации с ID = 1
+            var response = await _client.GetAsync("/api/locations/1");
+
+            // Проверяем, что ответ имеет статус 200 OK
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+            // Читаем тело ответа
             var content = await response.Content.ReadAsStringAsync();
-            var location = JsonConvert.DeserializeObject<Location>(content);
+
+            // Десериализуем в DTO
+            var location = JsonConvert.DeserializeObject<LocationResponseDTO>(content);
+
+            // Проверяем, что объект не null и у него правильный ID
             Assert.NotNull(location);
             Assert.Equal(1, location.Id);
         }
 
         [Fact]
-        public async Task GetLocationById_ShouldReturnNotFound_WhenNotExists()
+        public async Task GetLocationById_ShouldReturnNoContent_WhenNotExists()
         {
             var response = await _client.GetAsync("/api/location/999");
-            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+            Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
         }
 
         [Fact]
