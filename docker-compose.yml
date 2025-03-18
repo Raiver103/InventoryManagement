@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   sqlserver:
     image: "mcr.microsoft.com/mssql/server:2022-latest"
@@ -13,7 +11,9 @@ services:
       - sqlserver_data:/var/opt/mssql
 
   api:
-    image: raiver103/inventory-api:latest  # Теперь тянем обновленный образ!
+    build:
+      context: .
+      dockerfile: InventoryManagement.WEB/Dockerfile
     container_name: inventory_api
     ports:
       - "5000:8080"
