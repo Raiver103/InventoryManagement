@@ -3,16 +3,26 @@ name: CI/CD Pipeline
 on:
   push:
     branches:
-      - master  # Запуск при пуше в main
+      - master  # Запуск при пуше в master
   pull_request:
     branches:
-      - master  # Запуск при PR в main
+      - master  # Запуск при PR в master
   workflow_dispatch:  # Возможность ручного запуска
 
 jobs:
   test:
-    name: Run Unit Tests
+    name: Run Unit & Integration Tests
     runs-on: ubuntu-latest
+    services:
+      sqlserver:
+        image: mcr.microsoft.com/mssql/server:2022-latest
+        env:
+          SA_PASSWORD: "Strong!Password@123"
+          ACCEPT_EULA: "Y"
+        ports:
+          - 1433:1433
+        options: --health-cmd "exit 0" --health-interval=5s --health-timeout=5s --health-retries=5
+
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -28,7 +38,10 @@ jobs:
       - name: Build Application
         run: dotnet build --no-restore --configuration Release
 
-      - name: Run Tests
+      - name: Wait for SQL Server to be ready
+        run: sleep 15s  # Ждем пока SQL Server полностью запустится
+
+      - name: Run Tests 
         run: dotnet test --no-build --configuration Release --logger trx
 
   build:
