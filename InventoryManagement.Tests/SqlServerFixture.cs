@@ -1,8 +1,4 @@
 ﻿using Microsoft.Data.SqlClient;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Testcontainers.MsSql;
 
@@ -13,15 +9,16 @@ namespace InventoryManagement.Tests
         public MsSqlContainer DbContainer { get; } = new MsSqlBuilder()
             .WithImage("mcr.microsoft.com/mssql/server:2022-latest")
             .WithPassword("Strong!Password@123")
+            .WithEnvironment("ACCEPT_EULA", "Y") // ✅ Флаг для запуска в CI/CD
             .Build();
 
-        public string ConnectionString => DbContainer.GetConnectionString();
+        public string ConnectionString => $"{DbContainer.GetConnectionString()};Database=TestInventoryManagement"; // ✅ Добавляем БД
 
         public async Task InitializeAsync()
         {
             await DbContainer.StartAsync();
 
-            var masterConnectionString = $"Server=localhost,{DbContainer.GetMappedPublicPort(1433)};Database=master;User Id=sa;Password=Strong!Password@123;TrustServerCertificate=True;";
+            var masterConnectionString = $"{DbContainer.GetConnectionString()};Database=master";
 
             using var connection = new SqlConnection(masterConnectionString);
             await connection.OpenAsync();
@@ -35,10 +32,9 @@ namespace InventoryManagement.Tests
             await command.ExecuteNonQueryAsync();
         }
 
-
         public async Task DisposeAsync()
         {
             await DbContainer.DisposeAsync();
-        } 
+        }
     }
 }
