@@ -39,6 +39,6 @@ namespace InventoryManagement.Tests
         public async Task DisposeAsync()
         {
             await DbContainer.DisposeAsync();
-        }
+        } 
     }
 }
