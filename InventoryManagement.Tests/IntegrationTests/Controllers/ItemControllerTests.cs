@@ -49,12 +49,23 @@ namespace InventoryManagement.Tests.IntegrationTests.Controllers
 
         private void SeedTestData(AppDbContext context)
         {
-            context.Items.RemoveRange(context.Items); // Очищаем таблицу
+            context.Items.RemoveRange(context.Items);
+            context.Locations.RemoveRange(context.Locations); // Очищаем таблицу Locations
             context.SaveChanges();
 
+            // ✅ 1. Добавляем тестовые локации
+            var locations = new List<Location>
+            {
+                new Location { Id = 1, Name = "Warehouse A" },
+                new Location { Id = 2, Name = "Warehouse B" }
+            };
+            context.Locations.AddRange(locations);
+            context.SaveChanges();
+
+            // ✅ 2. Добавляем тестовые товары, указывая `LocationId`
             context.Items.AddRange(
-                new Item { Name = "Test Item 1", Quantity = 10, Category = "Test Category 1" },
-                new Item { Name = "Test Item 2", Quantity = 20, Category = "Test Category 2" }
+                new Item { Name = "Test Item 1", Quantity = 10, Category = "Test Category 1", LocationId = 1 },
+                new Item { Name = "Test Item 2", Quantity = 20, Category = "Test Category 2", LocationId = 2 }
             );
             context.SaveChanges();
         }
