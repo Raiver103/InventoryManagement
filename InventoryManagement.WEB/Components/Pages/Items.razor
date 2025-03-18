@@ -63,7 +63,7 @@ else
         // Получаем список товаров с API
         items = await client.GetFromJsonAsync<List<ItemResponseDTO>>("api/item");
         hubConnection = new HubConnectionBuilder()
-            .WithUrl("http://localhost:5000/inventoryHub")
+            .WithUrl("http://inventory_api:8080/inventoryHub")
             .WithAutomaticReconnect()
             .Build();
 

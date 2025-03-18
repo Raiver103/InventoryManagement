@@ -65,7 +65,7 @@ else
         transactions = await client.GetFromJsonAsync<List<TransactionResponseDTO>>("api/transaction");
 
         hubConnection = new HubConnectionBuilder()
-            .WithUrl("http://localhost:5000/inventoryHub")
+            .WithUrl("http://inventory_api:8080/inventoryHub")
             .WithAutomaticReconnect()
             .Build();
 
