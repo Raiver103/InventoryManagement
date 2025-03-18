@@ -33,7 +33,7 @@ namespace InventoryManagement.WEB.Controllers
         {
             await _accountService.AssignRoleAfterLoginAsync(User, "Admin");
             await _accountService.SyncUserAsync(User);
-            return Redirect("https://localhost:7025/afterlogin");
+            return Redirect("http://localhost:5000/afterlogin");
         }
 
         /// <summary>

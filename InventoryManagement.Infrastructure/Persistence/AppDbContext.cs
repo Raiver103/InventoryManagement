@@ -1,7 +1,7 @@
 ﻿using InventoryManagement.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
-namespace InventoryManagement.Infastructure.Persistence
+namespace InventoryManagement.Infrastructure.Persistence
 {
     public class AppDbContext : DbContext
     {

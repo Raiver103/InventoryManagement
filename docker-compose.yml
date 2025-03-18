@@ -1,0 +1,31 @@
+version: "3.8"
+
+services:
+  sqlserver:
+    image: "mcr.microsoft.com/mssql/server:2022-latest"
+    container_name: inventory_db
+    ports:
+      - "1433:1433"
+    environment:
+      SA_PASSWORD: "Strong!Password@123"
+      ACCEPT_EULA: "Y"
+    volumes:
+      - sqlserver_data:/var/opt/mssql
+
+  api:
+    build:
+      context: .
+      dockerfile: InventoryManagement.WEB/Dockerfile
+    container_name: inventory_api
+    ports:
+      - "5000:8080"
+    depends_on:
+      - sqlserver
+    environment:
+      ConnectionStrings__DefaultConnection: "Data Source=RAIVER\\MSSQLSERVER103;Initial Catalog=InventoryManagement;Integrated Security=True;Connect Timeout=30;Encrypt=False;Trust Server Certificate=False;Application Intent=ReadWrite;Multi Subnet Failover=False"
+    
+volumes:
+  sqlserver_data:
+
+
+  

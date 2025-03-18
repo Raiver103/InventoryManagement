@@ -1,5 +1,5 @@
 ﻿using InventoryManagement.Domain.Interfaces;
-using InventoryManagement.Infastructure.Models.Auth0;
+using InventoryManagement.Infrastructure.Models.Auth0;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json; 
 using System.Net.Http.Headers;

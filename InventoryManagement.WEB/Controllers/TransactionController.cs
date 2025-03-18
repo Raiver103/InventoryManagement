@@ -4,7 +4,7 @@ using InventoryManagement.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using System.Text;
-using InventoryManagement.Infastructure.Hubs;
+using InventoryManagement.Infrastructure.Hubs;
 using InventoryManagement.Application.Interfaces;
 using Swashbuckle.AspNetCore.Annotations; // Добавлено для Swagger
 

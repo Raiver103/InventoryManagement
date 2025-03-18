@@ -1,4 +1,4 @@
-﻿namespace InventoryManagement.Infastructure.Models.Auth0
+﻿namespace InventoryManagement.Infrastructure.Models.Auth0
 {
     public class Auth0Role
     {

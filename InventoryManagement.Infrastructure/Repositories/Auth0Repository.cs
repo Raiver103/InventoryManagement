@@ -5,7 +5,7 @@ using InventoryManagement.Domain.Entities.Auth0;
 using InventoryManagement.Domain.Interfaces;
 using System.Net.Http.Headers;
 
-namespace Infrastructure.Repositories
+namespace InventoryManagement.Infrastructure.Repositories
 {
     public class Auth0Repository : IAuth0Repository
     {

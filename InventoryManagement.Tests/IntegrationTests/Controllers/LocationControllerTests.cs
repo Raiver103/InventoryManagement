@@ -1,5 +1,6 @@
 ﻿using InventoryManagement.Domain.Entities;
-using InventoryManagement.Infastructure.Persistence;
+using InventoryManagement.Infrastructure.Persistence;
+using InventoryManagement.Infrastructure.Persistence;
 using InventoryManagement.WEB;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;

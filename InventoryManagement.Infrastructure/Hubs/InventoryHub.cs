@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 
-namespace InventoryManagement.Infastructure.Hubs
+namespace InventoryManagement.Infrastructure.Hubs
 {
     public class InventoryHub : Hub
     {

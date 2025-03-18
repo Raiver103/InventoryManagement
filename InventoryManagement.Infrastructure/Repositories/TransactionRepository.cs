@@ -1,9 +1,9 @@
 ﻿using InventoryManagement.Domain.Entities;
 using InventoryManagement.Domain.Interfaces;
-using InventoryManagement.Infastructure.Persistence;
+using InventoryManagement.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore; 
 
-namespace InventoryManagement.Infastructure.Repositories
+namespace InventoryManagement.Infrastructure.Repositories
 {
     public class TransactionRepository : ITransactionRepository
     {

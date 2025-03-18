@@ -1,13 +1,11 @@
-using Auth0.AspNetCore.Authentication;
-using Infrastructure.Repositories;
+using Auth0.AspNetCore.Authentication; 
 using InventoryManagement.Application.Interfaces;
 using InventoryManagement.Application.Mapping;
 using InventoryManagement.Application.Services;
 using InventoryManagement.Domain.Interfaces;
-using InventoryManagement.Infastructure.Hubs;
-using InventoryManagement.Infastructure.Identity;
-using InventoryManagement.Infastructure.Persistence;
-using InventoryManagement.Infastructure.Repositories;
+using InventoryManagement.Infrastructure.Hubs;
+using InventoryManagement.Infrastructure.Identity;
+using InventoryManagement.Infrastructure.Persistence;
 using InventoryManagement.Infrastructure.Repositories;
 using InventoryManagement.WEB.Components;
 using InventoryManagement.WEB.Middleware;
@@ -16,6 +14,10 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using Serilog; 
 
+// add beautiful ui
+// add ci cd
+// delete comments
+// structure code
 namespace InventoryManagement.WEB
 {
     public class Program
@@ -28,22 +30,24 @@ namespace InventoryManagement.WEB
                 .AddInteractiveServerComponents();
 
             builder.Services
-            .AddAuth0WebAppAuthentication(options =>
-            {
-                options.Domain = builder.Configuration["Auth0:Domain"];
-                options.ClientId = builder.Configuration["Auth0:ClientId"];
-                options.ClientSecret = builder.Configuration["Auth0:ClientSecret"];
-            })
-            .WithAccessToken(options =>
-            {
-                options.Audience = builder.Configuration["Auth0:Audience"];
-            });
+                .AddAuth0WebAppAuthentication(options =>
+                {
+                    options.Domain = builder.Configuration["Auth0:Domain"];
+                    options.ClientId = builder.Configuration["Auth0:ClientId"];
+                    options.ClientSecret = builder.Configuration["Auth0:ClientSecret"];
+                })
+                .WithAccessToken(options =>
+                {
+                    options.Audience = builder.Configuration["Auth0:Audience"];
+                });
+
             builder.Services.AddAuthorization(options =>
             {
                 options.AddPolicy("Admin", policy => policy.RequireRole("Admin"));
                 options.AddPolicy("Manager", policy => policy.RequireRole("Manager"));
                 options.AddPolicy("Employee", policy => policy.RequireRole("Employee"));
             });
+
             builder.Services.AddControllersWithViews();
 
             builder.Services.AddSignalR();
@@ -79,7 +83,7 @@ namespace InventoryManagement.WEB
 
             builder.Services.AddHttpClient("ApiClient", client =>
             {
-                client.BaseAddress = new Uri("https://localhost:7025/");
+                client.BaseAddress = new Uri("http://localhost:5000/");
             });
 
             Log.Logger = new LoggerConfiguration()
@@ -105,7 +109,6 @@ namespace InventoryManagement.WEB
                     }
                 });
 
-                // ¬ключаем XML-документацию (см. шаг 3)
                 var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
                 var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
                 options.IncludeXmlComments(xmlPath);

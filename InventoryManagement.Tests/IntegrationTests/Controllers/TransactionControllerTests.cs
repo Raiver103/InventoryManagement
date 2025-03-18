@@ -1,12 +1,12 @@
 ﻿using InventoryManagement.Domain.Entities;
-using InventoryManagement.Infastructure.Persistence;
+using InventoryManagement.Infrastructure.Persistence;
 using InventoryManagement.WEB;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System.Net.Http.Json;
 using System.Net;
-using Newtonsoft.Json;
+using Newtonsoft.Json; 
 
 namespace InventoryManagement.Tests.IntegrationTests.Controllers
 {

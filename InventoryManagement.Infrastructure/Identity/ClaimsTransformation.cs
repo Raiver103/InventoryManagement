@@ -1,7 +1,7 @@
 ﻿using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
 
-namespace InventoryManagement.Infastructure.Identity
+namespace InventoryManagement.Infrastructure.Identity
 {
     public class ClaimsTransformation : IClaimsTransformation
     {

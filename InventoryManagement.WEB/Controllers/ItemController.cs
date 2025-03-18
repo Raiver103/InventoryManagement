@@ -2,7 +2,7 @@
 using InventoryManagement.Application.DTOs.Item;
 using InventoryManagement.Application.Interfaces;
 using InventoryManagement.Domain.Entities;
-using InventoryManagement.Infastructure.Hubs;
+using InventoryManagement.Infrastructure.Hubs;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Swashbuckle.AspNetCore.Annotations; // Добавлено для Swagger

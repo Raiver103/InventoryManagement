@@ -9,7 +9,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "InventoryManagement.Domain"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "InventoryManagement.Application", "InventoryManagement.Application", "{613ECC61-91C2-410C-806C-4D0EDE95A002}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "InventoryManagement.Infastructure", "InventoryManagement.Infastructure", "{11309755-3EA8-4C3D-A686-C49F0705A617}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "InventoryManagement.Infrastructure", "InventoryManagement.Infrastructure", "{11309755-3EA8-4C3D-A686-C49F0705A617}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "InventoryManagement.Tests", "InventoryManagement.Tests", "{68B89946-171B-47EB-9729-E79630246B86}"
 EndProject
@@ -17,11 +17,23 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InventoryManagement.Applica
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InventoryManagement.Domain", "InventoryManagement.Domain\InventoryManagement.Domain.csproj", "{6E27461C-89F6-419D-B430-C1E67D795D87}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InventoryManagement.Infastructure", "InventoryManagement.Infastructure\InventoryManagement.Infastructure.csproj", "{9B238591-7255-4602-867A-2892D0C1B1CB}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InventoryManagement.WEB", "InventoryManagement.WEB\InventoryManagement.WEB.csproj", "{9A83AB62-41F5-4F20-8599-4954C6D7A657}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InventoryManagement.Tests", "InventoryManagement.Tests\InventoryManagement.Tests.csproj", "{99F4D78B-9DBD-4DB9-93A1-85EFB1ECA52F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{0A0C54FE-B632-4F11-A108-20C480082CB5}"
+	ProjectSection(SolutionItems) = preProject
+		docker-compose.yml = docker-compose.yml
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{EADB1912-82B4-430F-A43D-2B5F59C53A1C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{C6A5146A-59C1-4670-A080-715521B883F2}"
+	ProjectSection(SolutionItems) = preProject
+		ci-cd.yml = ci-cd.yml
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InventoryManagement.Infrastructure", "InventoryManagement.Infrastructure\InventoryManagement.Infrastructure.csproj", "{D9044AF5-AB1C-40EF-9748-C97E2B5A084A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -37,10 +49,6 @@ Global
 		{6E27461C-89F6-419D-B430-C1E67D795D87}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6E27461C-89F6-419D-B430-C1E67D795D87}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6E27461C-89F6-419D-B430-C1E67D795D87}.Release|Any CPU.Build.0 = Release|Any CPU
-		{9B238591-7255-4602-867A-2892D0C1B1CB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9B238591-7255-4602-867A-2892D0C1B1CB}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9B238591-7255-4602-867A-2892D0C1B1CB}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9B238591-7255-4602-867A-2892D0C1B1CB}.Release|Any CPU.Build.0 = Release|Any CPU
 		{9A83AB62-41F5-4F20-8599-4954C6D7A657}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{9A83AB62-41F5-4F20-8599-4954C6D7A657}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9A83AB62-41F5-4F20-8599-4954C6D7A657}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -49,6 +57,10 @@ Global
 		{99F4D78B-9DBD-4DB9-93A1-85EFB1ECA52F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{99F4D78B-9DBD-4DB9-93A1-85EFB1ECA52F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{99F4D78B-9DBD-4DB9-93A1-85EFB1ECA52F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D9044AF5-AB1C-40EF-9748-C97E2B5A084A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D9044AF5-AB1C-40EF-9748-C97E2B5A084A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D9044AF5-AB1C-40EF-9748-C97E2B5A084A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D9044AF5-AB1C-40EF-9748-C97E2B5A084A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -56,8 +68,9 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{6CD741D7-76E7-4807-AC5B-C05D47F51729} = {613ECC61-91C2-410C-806C-4D0EDE95A002}
 		{6E27461C-89F6-419D-B430-C1E67D795D87} = {7245B398-4689-4E84-B2B0-97956C4C3D62}
-		{9B238591-7255-4602-867A-2892D0C1B1CB} = {11309755-3EA8-4C3D-A686-C49F0705A617}
 		{9A83AB62-41F5-4F20-8599-4954C6D7A657} = {1F43EC1A-24E0-4C1D-8854-6DECE3643C91}
 		{99F4D78B-9DBD-4DB9-93A1-85EFB1ECA52F} = {68B89946-171B-47EB-9729-E79630246B86}
+		{C6A5146A-59C1-4670-A080-715521B883F2} = {EADB1912-82B4-430F-A43D-2B5F59C53A1C}
+		{D9044AF5-AB1C-40EF-9748-C97E2B5A084A} = {11309755-3EA8-4C3D-A686-C49F0705A617}
 	EndGlobalSection
 EndGlobal

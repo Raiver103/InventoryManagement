@@ -3,7 +3,7 @@ using InventoryManagement.Domain.Entities;
 using InventoryManagement.Domain.Interfaces;
 using Moq;
 using InventoryManagement.Application.Interfaces;
-using InventoryManagement.Infastructure.Repositories;
+using InventoryManagement.Infrastructure.Repositories;
 
 namespace InventoryManagement.Tests.UnitTests.Services
 {
