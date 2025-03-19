@@ -16,8 +16,8 @@ namespace InventoryManagement.Tests.IntegrationTests.Controllers
     {
         private readonly HttpClient _client;
         private readonly WebApplicationFactory<Program> _factory;
-        private readonly string _connectionString = "Server=inventory_db_tests,1433;Database=InventoryManagement.Tests;User Id=sa;Password=Strong!Password@123;TrustServerCertificate=True;";
-        //private readonly string _connectionString = "Server=localhost,1434;Database=InventoryManagement.Tests;User Id=sa;Password=Strong!Password@123;TrustServerCertificate=True;";
+        //private readonly string _connectionString = "Server=inventory_db_tests,1433;Database=InventoryManagement.Tests;User Id=sa;Password=Strong!Password@123;TrustServerCertificate=True;";
+        private readonly string _connectionString = "Server=localhost,1434;Database=InventoryManagement.Tests;User Id=sa;Password=Strong!Password@123;TrustServerCertificate=True;";
 
         public ItemControllerTests(WebApplicationFactory<Program> factory)
         {
