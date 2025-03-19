@@ -22,11 +22,13 @@ namespace InventoryManagement.WEB
 {
     public class Program
     {
+
         private static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+            string _connectionString = "Server=inventory_db_tests,1433;Database=InventoryManagement.Tests;User Id=sa;Password=Strong!Password@123;TrustServerCertificate=True;";
 
-            builder.Services.AddRazorComponents()
+        builder.Services.AddRazorComponents()
                 .AddInteractiveServerComponents();
 
             builder.Services
@@ -56,6 +58,11 @@ namespace InventoryManagement.WEB
 
             builder.Services.AddDbContext<AppDbContext>(options =>
                     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+            
+            builder.Services.AddDbContext<AppDbContext>(options =>
+                options.UseSqlServer(_connectionString,
+                sqlOptions => sqlOptions.EnableRetryOnFailure()));
+
 
             builder.Services.AddSingleton<IClaimsTransformation, ClaimsTransformation>();
 

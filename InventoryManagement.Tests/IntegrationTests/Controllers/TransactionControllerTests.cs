@@ -16,9 +16,9 @@ namespace InventoryManagement.Tests.IntegrationTests.Controllers
     {
         private readonly HttpClient _client;
         private readonly WebApplicationFactory<Program> _factory;
-        private readonly string _connectionString = "Server=inventory_db_tests,1433;Database=InventoryManagement.Tests;User Id=sa;Password=Strong!Password@123;TrustServerCertificate=True;";
+        private readonly string _connectionString = "Server=inventory_db_tests,1433;Database=InventoryManagement;User Id=sa;Password=Strong!Password@123;TrustServerCertificate=True;";
         //private readonly string _connectionString = "Server=localhost,1434;Database=InventoryManagement.Tests;User Id=sa;Password=Strong!Password@123;TrustServerCertificate=True;";
-        
+
         public TransactionControllerTests(WebApplicationFactory<Program> factory)
         {
             _factory = factory.WithWebHostBuilder(builder =>
@@ -42,7 +42,7 @@ namespace InventoryManagement.Tests.IntegrationTests.Controllers
                         var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
                         context.Database.EnsureDeleted();
                         context.Database.EnsureCreated();
-                        WaitForSqlServer()
+                        WaitForSqlServer();
                         SeedTestData(context);
                     }
                 });
