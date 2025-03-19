@@ -26,7 +26,7 @@ namespace InventoryManagement.WEB
         private static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-            string _connectionString = "Server=inventory_db_tests,1433;Database=InventoryManagement.Tests;User Id=sa;Password=Strong!Password@123;TrustServerCertificate=True;";
+            //string _connectionString = "Server=inventory_db_tests,1433;Database=InventoryManagement.Tests;User Id=sa;Password=Strong!Password@123;TrustServerCertificate=True;";
 
         builder.Services.AddRazorComponents()
                 .AddInteractiveServerComponents();
@@ -59,9 +59,9 @@ namespace InventoryManagement.WEB
             builder.Services.AddDbContext<AppDbContext>(options =>
                     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
             
-            builder.Services.AddDbContext<AppDbContext>(options =>
-                options.UseSqlServer(_connectionString,
-                sqlOptions => sqlOptions.EnableRetryOnFailure()));
+            //builder.Services.AddDbContext<AppDbContext>(options =>
+            //    options.UseSqlServer(_connectionString,
+            //    sqlOptions => sqlOptions.EnableRetryOnFailure()));
 
 
             builder.Services.AddSingleton<IClaimsTransformation, ClaimsTransformation>();
