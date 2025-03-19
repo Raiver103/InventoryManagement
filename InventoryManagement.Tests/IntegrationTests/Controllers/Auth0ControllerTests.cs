@@ -46,9 +46,17 @@ namespace InventoryManagement.Tests.IntegrationTests.Controllers
         public async Task CreateUser_ShouldReturnCreatedUser()
         {
             // Arrange
-            var request = new CreateUserRequest { FirstName = "John", LastName = "Doe", Email = "test@example.com", Role = "Admin", Password = "password123" };
+            var request = new CreateUserRequest 
+            { 
+                FirstName = "John", 
+                LastName = "Doe", 
+                Email = "test@example.com", 
+                Role = "Admin", 
+                Password = "password123" 
+            };
             var createdUser = new User { Id = "789", Email = "test@example.com" };
-            _auth0ServiceMock.Setup(service => service.CreateUserAsync(request)).ReturnsAsync(createdUser);
+            _auth0ServiceMock.Setup(service => 
+                service.CreateUserAsync(request)).ReturnsAsync(createdUser);
 
             // Act
             var result = await _controller.CreateUser(request);
@@ -64,8 +72,21 @@ namespace InventoryManagement.Tests.IntegrationTests.Controllers
         public async Task UpdateUser_ShouldReturnUpdatedUser()
         {
             // Arrange
-            var request = new UpdateUserRequest { FirstName = "Jane", LastName = "Smith", Email = "jane@example.com", Role = "User" };
-            var updatedUser = new User { Id = "123", Email = "jane@example.com", FirstName = "Jane", LastName = "Smith", Role = "User" };
+            var request = new UpdateUserRequest 
+            { 
+                FirstName = "Jane", 
+                LastName = "Smith", 
+                Email = "jane@example.com", 
+                Role = "User" 
+            };
+            var updatedUser = new User 
+            { 
+                Id = "123", 
+                Email = "jane@example.com", 
+                FirstName = "Jane", 
+                LastName = "Smith",
+                Role = "User" 
+            };
             _auth0ServiceMock.Setup(service => service.UpdateUserAsync("123", request)).ReturnsAsync(updatedUser);
 
             // Act
@@ -85,7 +106,8 @@ namespace InventoryManagement.Tests.IntegrationTests.Controllers
         public async Task DeleteUser_ShouldReturnNoContent()
         {
             // Arrange
-            _auth0ServiceMock.Setup(service => service.DeleteUserAsync("123")).Returns(Task.CompletedTask);
+            _auth0ServiceMock.Setup(service => service.DeleteUserAsync("123"))
+                .Returns(Task.CompletedTask);
 
             // Act
             var result = await _controller.DeleteUser("123");
@@ -100,7 +122,8 @@ namespace InventoryManagement.Tests.IntegrationTests.Controllers
         {
             // Arrange
             var expectedToken = "test-access-token";
-            _auth0ServiceMock.Setup(service => service.GetAccessTokenAsync()).ReturnsAsync(expectedToken);
+            _auth0ServiceMock.Setup(service => service.GetAccessTokenAsync())
+                .ReturnsAsync(expectedToken);
 
             // Act
             var result = await _controller.GetAccessTokenAsync();

@@ -25,11 +25,10 @@ namespace InventoryManagement.WEB
 
         private static void Main(string[] args)
         {
-            var builder = WebApplication.CreateBuilder(args);
-            //string _connectionString = "Server=inventory_db_tests,1433;Database=InventoryManagement.Tests;User Id=sa;Password=Strong!Password@123;TrustServerCertificate=True;";
+            var builder = WebApplication.CreateBuilder(args); 
 
-        builder.Services.AddRazorComponents()
-                .AddInteractiveServerComponents();
+            builder.Services.AddRazorComponents()
+                    .AddInteractiveServerComponents();
 
             builder.Services
                 .AddAuth0WebAppAuthentication(options =>
@@ -58,12 +57,7 @@ namespace InventoryManagement.WEB
 
             builder.Services.AddDbContext<AppDbContext>(options =>
                     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-            
-            //builder.Services.AddDbContext<AppDbContext>(options =>
-            //    options.UseSqlServer(_connectionString,
-            //    sqlOptions => sqlOptions.EnableRetryOnFailure()));
-
-
+             
             builder.Services.AddSingleton<IClaimsTransformation, ClaimsTransformation>();
 
             builder.Services.AddHttpClient<Auth0Service>();
@@ -123,25 +117,18 @@ namespace InventoryManagement.WEB
 
 
             var app = builder.Build();
-            using (var scope = app.Services.CreateScope())
-            {
-                var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-                
-                if (!dbContext.Database.GetPendingMigrations().Any())
-                {
-                    dbContext.Database.Migrate();
-                }
-            }
 
-            app.UseCors(builder =>
-                builder.AllowAnyOrigin()
-                   .AllowAnyMethod()
-                   .AllowAnyHeader());
             if (!app.Environment.IsDevelopment())
             {
-                app.UseExceptionHandler("/Error", createScopeForErrors: true);
+                using (var scope = app.Services.CreateScope())
+                {
+                    var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
-                app.UseHsts();
+                    if (!dbContext.Database.GetPendingMigrations().Any())
+                    {
+                        dbContext.Database.Migrate();
+                    }
+                }
             }
 
             app.UseMiddleware<ExceptionMiddleware>();
@@ -170,5 +157,5 @@ namespace InventoryManagement.WEB
 
             app.Run();
         }
-    } 
+    }
 }

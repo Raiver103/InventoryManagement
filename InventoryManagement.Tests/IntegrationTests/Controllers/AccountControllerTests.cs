@@ -1,6 +1,5 @@
 ﻿using InventoryManagement.Application.DTOs.User;
 using InventoryManagement.Application.Interfaces;
-using InventoryManagement.Application.Services;
 using InventoryManagement.WEB.Controllers;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;

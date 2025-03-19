@@ -15,10 +15,14 @@ namespace InventoryManagement.Infrastructure.Repositories
 
         private const string Auth0ApiBase = "/api/v2/users/";
 
-        public AccountRepository(HttpClient httpClient, IConfiguration config, IAuth0Repository auth0Repository)
+        public AccountRepository(
+            HttpClient httpClient, 
+            IConfiguration config, 
+            IAuth0Repository auth0Repository)
         {
             _httpClient = httpClient;
-            _auth0Domain = config["Auth0:Domain"] ?? throw new ArgumentNullException(nameof(config));
+            _auth0Domain = config["Auth0:Domain"] 
+                ?? throw new ArgumentNullException(nameof(config));
             _auth0Repository = auth0Repository;
         }
 
@@ -61,7 +65,8 @@ namespace InventoryManagement.Infrastructure.Repositories
 
         private void SetAuthorizationHeader(string accessToken)
         {
-            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+            _httpClient.DefaultRequestHeaders.Authorization 
+                = new AuthenticationHeaderValue("Bearer", accessToken);
         }
 
         private static StringContent CreateJsonContent(object payload)

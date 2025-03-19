@@ -38,7 +38,8 @@ namespace InventoryManagement.Infrastructure.Repositories
 
         public async Task DeleteAsync(int id)
         {
-            var item = await GetByIdAsync(id) ?? throw new KeyNotFoundException($"Item с ID {id} не найден.");
+            var item = await GetByIdAsync(id) 
+                ?? throw new KeyNotFoundException($"Item с ID {id} не найден.");
             _context.Items.Remove(item);
             await _context.SaveChangesAsync();
         }
