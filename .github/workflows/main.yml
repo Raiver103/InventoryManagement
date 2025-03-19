@@ -3,11 +3,11 @@ name: CI/CD Pipeline
 on:
   push:
     branches:
-      - master  # Запуск при пуше в master
+      - master  
   pull_request:
     branches:
-      - master  # Запуск при PR в master
-  workflow_dispatch:  # Возможность ручного запуска
+      - master  
+  workflow_dispatch: 
 
 jobs:
   test:
@@ -30,7 +30,7 @@ jobs:
       - name: Set up .NET
         uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: '8.0'  # Укажи свою версию .NET
+          dotnet-version: '8.0' 
 
       - name: Restore Dependencies
         run: dotnet restore
@@ -52,7 +52,7 @@ jobs:
 
   build:
     name: Build and Push Docker Image
-    needs: test  # Запуск только если тесты пройдены
+    needs: test 
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
