@@ -1,4 +1,4 @@
-<h1 align="center">InventoryManagement</h1>
+<h1 align="center">InventoryManagement with <3 for Innowise group</h1>
 
 # Technical tools 
 * Backend: ASP.NET Web API
