@@ -26,13 +26,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		docker-compose.yml = docker-compose.yml
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{EADB1912-82B4-430F-A43D-2B5F59C53A1C}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{C6A5146A-59C1-4670-A080-715521B883F2}"
-	ProjectSection(SolutionItems) = preProject
-		ci-cd.yml = ci-cd.yml
-	EndProjectSection
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InventoryManagement.Infrastructure", "InventoryManagement.Infrastructure\InventoryManagement.Infrastructure.csproj", "{D9044AF5-AB1C-40EF-9748-C97E2B5A084A}"
 EndProject
 Global
@@ -70,7 +63,6 @@ Global
 		{6E27461C-89F6-419D-B430-C1E67D795D87} = {7245B398-4689-4E84-B2B0-97956C4C3D62}
 		{9A83AB62-41F5-4F20-8599-4954C6D7A657} = {1F43EC1A-24E0-4C1D-8854-6DECE3643C91}
 		{99F4D78B-9DBD-4DB9-93A1-85EFB1ECA52F} = {68B89946-171B-47EB-9729-E79630246B86}
-		{C6A5146A-59C1-4670-A080-715521B883F2} = {EADB1912-82B4-430F-A43D-2B5F59C53A1C}
 		{D9044AF5-AB1C-40EF-9748-C97E2B5A084A} = {11309755-3EA8-4C3D-A686-C49F0705A617}
 	EndGlobalSection
 EndGlobal

@@ -10,6 +10,17 @@ services:
     volumes:
       - sqlserver_data:/var/opt/mssql
 
+  sqlserver_tests:
+    image: "mcr.microsoft.com/mssql/server:2022-latest"
+    container_name: inventory_db_tests
+    ports:
+      - "1434:1433"   
+    environment:
+      SA_PASSWORD: "Strong!Password@123"
+      ACCEPT_EULA: "Y"
+    volumes:
+      - sqlserver_test_data:/var/opt/mssql
+
   api:
     build:
       context: .
@@ -24,3 +35,4 @@ services:
 
 volumes:
   sqlserver_data:
+  sqlserver_test_data:

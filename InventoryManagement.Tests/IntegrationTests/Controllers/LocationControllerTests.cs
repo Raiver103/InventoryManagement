@@ -7,6 +7,7 @@ using Newtonsoft.Json;
 using System.Net.Http.Json;
 using System.Net;
 using InventoryManagement.Infrastructure.Persistence;
+using Microsoft.Data.SqlClient;
 
 namespace InventoryManagement.Tests.IntegrationTests.Controllers
 {
@@ -15,7 +16,8 @@ namespace InventoryManagement.Tests.IntegrationTests.Controllers
     {
         private readonly HttpClient _client;
         private readonly WebApplicationFactory<Program> _factory;
-        private readonly string _connectionString = "Data Source=RAIVER\\MSSQLSERVER103;Initial Catalog=InventoryManagement.Tests;Integrated Security=True;Connect Timeout=30;Encrypt=False;Trust Server Certificate=False;Application Intent=ReadWrite;Multi Subnet Failover=False";
+        private readonly string _connectionString = "Server=inventory_db_tests,1433;Database=InventoryManagement.Tests;User Id=sa;Password=Strong!Password@123;TrustServerCertificate=True;";
+        //private readonly string _connectionString = "Server=localhost,1434;Database=InventoryManagement.Tests;User Id=sa;Password=Strong!Password@123;TrustServerCertificate=True;";
 
         public LocationControllerTests(WebApplicationFactory<Program> factory)
         {
@@ -48,6 +50,8 @@ namespace InventoryManagement.Tests.IntegrationTests.Controllers
 
         private void SeedTestData(AppDbContext context)
         {
+            WaitForSqlServer();
+
             context.Database.EnsureDeleted();
             context.Database.EnsureCreated();
 
@@ -60,6 +64,25 @@ namespace InventoryManagement.Tests.IntegrationTests.Controllers
             context.Locations.AddRange(locations);
             context.SaveChanges();
         }
+
+        private void WaitForSqlServer()
+        {
+            using var connection = new SqlConnection(_connectionString);
+            for (int i = 0; i < 10; i++)  // Даем 10 попыток
+            {
+                try
+                {
+                    connection.Open();
+                    return;  // Если успешно — выходим
+                }
+                catch
+                {
+                    Thread.Sleep(5000);  // Ждем 5 секунд перед повтором
+                }
+            }
+            throw new Exception("Не удалось подключиться к SQL Server в Docker");
+        }
+
 
         [Fact]
         public async Task GetAllLocations_ShouldReturnAllLocations()
