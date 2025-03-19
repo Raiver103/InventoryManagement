@@ -2,7 +2,7 @@
 using InventoryManagement.Domain.Entities.Auth0;
 using InventoryManagement.Application.Interfaces;
 using InventoryManagement.Application.DTOs.User;
-using Swashbuckle.AspNetCore.Annotations; // Добавлено для аннотаций Swagger
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace InventoryManagement.WEB.Controllers
 {

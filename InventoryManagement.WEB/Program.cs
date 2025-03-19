@@ -35,7 +35,7 @@ namespace InventoryManagement.WEB
                 {
                     options.Domain = builder.Configuration["Auth0:Domain"];
                     options.ClientId = builder.Configuration["Auth0:ClientId"];
-                    options.ClientSecret = builder.Configuration["Auth0:ClientSecret"];
+                    options.ClientSecret = builder.Configuration["Auth0:ClientSecret"]; 
                 })
                 .WithAccessToken(options =>
                 {
@@ -148,10 +148,10 @@ namespace InventoryManagement.WEB
             app.UseAuthorization();
 
             app.MapControllers();
-            app.MapControllerRoute(
-                name: "default",
-                pattern: "{controller=Home}/{action=Index}/{id?}");
-
+            //app.MapControllerRoute(
+            //    name: "default",
+            //    pattern: "{controller=Home}/{action=Index}/{id?}");
+             
             app.MapRazorComponents<App>()
                     .AddInteractiveServerRenderMode();
 

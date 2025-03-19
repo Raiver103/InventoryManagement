@@ -45,7 +45,7 @@ namespace InventoryManagement.WEB.Controllers
         [SwaggerOperation(Summary = "Перенаправляет на страницу входа")]
         public async Task<IActionResult> Login(string returnUrl = "/")
         {
-            return Redirect("https://localhost:7025/login");
+            return Redirect("http://localhost:5000/login");
         }
 
         /// <summary>
@@ -55,9 +55,9 @@ namespace InventoryManagement.WEB.Controllers
         /// <returns>Перенаправление на страницу входа</returns>
         [HttpGet("AccessDenied")]
         [SwaggerOperation(Summary = "Перенаправляет на страницу входа при отказе в доступе")]
-        public IActionResult LoginUserRedirectAccessDenied(string returnUrl = "/")
+        public IActionResult LoginUserRedirectAccessDenied(string returnUrl = "/unauthorized")
         {
-            return Redirect("https://localhost:7025/login");
+            return Redirect("http://localhost:5000/unauthorized");
         }
 
         /// <summary>
