@@ -17,7 +17,7 @@
 * WebSocket (SignalR) for real-time updates on inventory changes(Items and Transactions)
 * Exporting reports about Transactions(CSV, Excel) 
 * GitHub Actions (CI/CD)
-  
+
 # ⚙️ CI/CD Pipeline (Workflow Overview)
 * On every push/PR to master:
     * Starts a SQL Server container
@@ -26,6 +26,7 @@
 * If tests pass:
     * Logs into Docker Hub
     * Builds and pushes the Docker image
+
 
 # Prerequisites
 ✅ Download Docker - https://www.docker.com/products/docker-desktop/
@@ -50,4 +51,52 @@
 4️⃣ Stop Docker-containers: 
 * docker-compose down
 
+# Auth0
+Post-Login Actions in Auth0
 
+What Happens Post-Login?
+
+* Adding User Metadata to ID Token
+
+    * Retrieves first_name and last_name from user_metadata.
+
+    * Adds them as custom claims to the ID token.
+
+* Injecting User Roles into Tokens
+
+    * Checks for user roles from event.authorization.roles.
+
+    * Adds them to both ID Token and Access Token under a custom namespace.
+
+* Assigning Default Role for Users 
+
+    * If the user has no assigned role, sets "Admin" in app_metadata.
+
+Why Use This?
+
+✅ Personalizing tokens with user-specific claims.
+
+✅ Enforcing role-based access control (RBAC).
+
+✅ Storing default roles for new users.
+
+
+<h2>Post-User Registration in Auth0</h3>
+
+What Happens Post-User Registration? 
+
+* Updates user_metadata
+
+    * Adds first_name, last_name, and assigns the "Admin"(for test) role.
+
+* Updates app_metadata
+
+    * Explicitly sets the "Admin"(for test) role in app_metadata.
+
+Why is this useful?
+
+✅ Automatically assigns roles to new users.
+
+✅ Enhances user profiles with additional metadata.
+
+✅ Simplifies access management through app_metadata.
