@@ -42,7 +42,7 @@ namespace InventoryManagement.Tests.IntegrationTests.Controllers
 
             // Assert
             var redirectResult = Assert.IsType<RedirectResult>(result);
-            Assert.Equal("https://localhost:7025/login", redirectResult.Url);
+            Assert.Equal("http://localhost:5000/login", redirectResult.Url);
         }
 
         [Fact]
