@@ -2,7 +2,9 @@
 
 
 Presentationt with <3 for Innowise group
+
 https://github.com/user-attachments/assets/e7e9ebe0-b742-429e-8e40-270127c130bb
+
 (but bad quality, If you need good quality write me in telegram @raiver103)
 
 
