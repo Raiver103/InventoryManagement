@@ -16,8 +16,8 @@ namespace InventoryManagement.Tests.IntegrationTests.Controllers
     {
         private readonly HttpClient _client;
         private readonly WebApplicationFactory<Program> _factory;
-        //private readonly string _connectionString = "Server=inventory_db_tests,1433;Database=InventoryManagement.Tests;User Id=sa;Password=Strong!Password@123;TrustServerCertificate=True;";
-        private readonly string _connectionString = "Server=localhost,1434;Database=InventoryManagement.Tests;User Id=sa;Password=Strong!Password@123;TrustServerCertificate=True;";
+        private readonly string _connectionString = "Server=inventory_db_tests,1433;Database=InventoryManagement.Tests;User Id=sa;Password=Strong!Password@123;TrustServerCertificate=True;";
+        //private readonly string _connectionString = "Server=localhost,1434;Database=InventoryManagement.Tests;User Id=sa;Password=Strong!Password@123;TrustServerCertificate=True;";
 
         public ItemControllerTests(WebApplicationFactory<Program> factory)
         {
@@ -43,6 +43,7 @@ namespace InventoryManagement.Tests.IntegrationTests.Controllers
                         var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
                         context.Database.EnsureDeleted();  // Удаляем БД перед тестами
                         context.Database.EnsureCreated();  // Создаем новую
+                        WaitForSqlServer();
                         SeedTestData(context);
                     }
                 });
@@ -58,10 +59,10 @@ namespace InventoryManagement.Tests.IntegrationTests.Controllers
 
             // ✅ Создаем Locations БЕЗ указания Id (SQL Server сам присвоит значения)
             var locations = new List<Location>
-    {
-        new Location { Name = "Warehouse A", Address = "123 Main St" },
-        new Location { Name = "Warehouse B", Address = "456 Side St" }
-    };
+            {
+                new Location { Name = "Warehouse A", Address = "123 Main St" },
+                new Location { Name = "Warehouse B", Address = "456 Side St" }
+            };
 
             context.Locations.AddRange(locations);
             context.SaveChanges();
@@ -72,15 +73,31 @@ namespace InventoryManagement.Tests.IntegrationTests.Controllers
 
             // ✅ Теперь создаем Items, указывая корректный LocationId
             var items = new List<Item>
-    {
-        new Item { Name = "Test Item 1", Quantity = 10, Category = "Test Category 1", LocationId = locationA.Id },
-        new Item { Name = "Test Item 2", Quantity = 20, Category = "Test Category 2", LocationId = locationB.Id }
-    };
+            {
+                new Item { Name = "Test Item 1", Quantity = 10, Category = "Test Category 1", LocationId = locationA.Id },
+                new Item { Name = "Test Item 2", Quantity = 20, Category = "Test Category 2", LocationId = locationB.Id }
+            };
 
             context.Items.AddRange(items);
             context.SaveChanges();
         }
-
+        private void WaitForSqlServer()
+        {
+            using var connection = new SqlConnection(_connectionString);
+            for (int i = 0; i < 10; i++)  // Даем 10 попыток
+            {
+                try
+                {
+                    connection.Open();
+                    return;  // Если подключение успешно — выходим
+                }
+                catch
+                {
+                    Thread.Sleep(5000);  // Ждем 5 секунд перед следующей попыткой
+                }
+            }
+            throw new Exception("Не удалось подключиться к SQL Server в Docker");
+        }
 
         [Fact]
         public async Task GetAllItems_ShouldReturnAllItems()

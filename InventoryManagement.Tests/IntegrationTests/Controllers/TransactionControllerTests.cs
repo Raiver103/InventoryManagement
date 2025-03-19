@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using System.Net.Http.Json;
 using System.Net;
 using Newtonsoft.Json;
+using Microsoft.Data.SqlClient;
 
 namespace InventoryManagement.Tests.IntegrationTests.Controllers
 {
@@ -15,8 +16,8 @@ namespace InventoryManagement.Tests.IntegrationTests.Controllers
     {
         private readonly HttpClient _client;
         private readonly WebApplicationFactory<Program> _factory;
-        //private readonly string _connectionString = "Server=inventory_db_tests,1433;Database=InventoryManagement.Tests;User Id=sa;Password=Strong!Password@123;TrustServerCertificate=True;";
-        private readonly string _connectionString = "Server=localhost,1434;Database=InventoryManagement.Tests;User Id=sa;Password=Strong!Password@123;TrustServerCertificate=True;";
+        private readonly string _connectionString = "Server=inventory_db_tests,1433;Database=InventoryManagement.Tests;User Id=sa;Password=Strong!Password@123;TrustServerCertificate=True;";
+        //private readonly string _connectionString = "Server=localhost,1434;Database=InventoryManagement.Tests;User Id=sa;Password=Strong!Password@123;TrustServerCertificate=True;";
         
         public TransactionControllerTests(WebApplicationFactory<Program> factory)
         {
@@ -41,6 +42,7 @@ namespace InventoryManagement.Tests.IntegrationTests.Controllers
                         var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
                         context.Database.EnsureDeleted();
                         context.Database.EnsureCreated();
+                        WaitForSqlServer()
                         SeedTestData(context);
                     }
                 });
@@ -54,11 +56,11 @@ namespace InventoryManagement.Tests.IntegrationTests.Controllers
             context.Database.EnsureCreated();
 
             var locations = new List<Location>
-    {
-        new Location { Name = "Warehouse A", Address = "Address 1" },
-        new Location { Name = "Warehouse B", Address = "Address 2" },
-        new Location { Name = "Warehouse C", Address = "Address 3" }
-    };
+            {
+                new Location { Name = "Warehouse A", Address = "Address 1" },
+                new Location { Name = "Warehouse B", Address = "Address 2" },
+                new Location { Name = "Warehouse C", Address = "Address 3" }
+            };
 
             context.Locations.AddRange(locations);
             context.SaveChanges(); // Сначала сохраняем, чтобы у локаций были сгенерированные ID
@@ -86,15 +88,32 @@ namespace InventoryManagement.Tests.IntegrationTests.Controllers
             context.SaveChanges();
 
             var transactions = new List<Transaction>
-    {
-        new Transaction { ItemId = item.Id, FromLocationId = locations[0].Id, ToLocationId = locations[1].Id, UserId = user.Id },
-        new Transaction { ItemId = item.Id, FromLocationId = locations[1].Id, ToLocationId = locations[2].Id, UserId = user.Id }
-    };
+            {
+                new Transaction { ItemId = item.Id, FromLocationId = locations[0].Id, ToLocationId = locations[1].Id, UserId = user.Id },
+                new Transaction { ItemId = item.Id, FromLocationId = locations[1].Id, ToLocationId = locations[2].Id, UserId = user.Id }
+            };
 
             context.Transactions.AddRange(transactions);
             context.SaveChanges();
         }
 
+        private void WaitForSqlServer()
+        {
+            using var connection = new SqlConnection(_connectionString);
+            for (int i = 0; i < 10; i++)  // Даем 10 попыток
+            {
+                try
+                {
+                    connection.Open();
+                    return;  // Если успешно — выходим
+                }
+                catch
+                {
+                    Thread.Sleep(5000);  // Ждем 5 секунд перед повтором
+                }
+            }
+            throw new Exception("Не удалось подключиться к SQL Server в Docker");
+        }
 
         [Fact]
         public async Task GetAllTransactions_ShouldReturnAllTransactions()
