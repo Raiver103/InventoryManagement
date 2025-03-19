@@ -1,12 +1,12 @@
 <h1 align="center">InventoryManagement</h1>
 
 # Technical tools 
-Backend: ASP.NET Web API
-Frontend: Blazor
-Database: Entity Framework Core, MS SQL Server
-Testing: Unit and integration tests
-Infrastructure: Docker
-Logging & Monitoring: Serilog, Exception Middleware
+* Backend: ASP.NET Web API
+* Frontend: Blazor
+* Database: Entity Framework Core, MS SQL Server
+* Testing: Unit and integration tests
+* Infrastructure: Docker
+* Logging & Monitoring: Serilog, Exception Middleware
 
 # Architecture
 * Clean Architecture
@@ -17,13 +17,22 @@ Logging & Monitoring: Serilog, Exception Middleware
 * WebSocket (SignalR) for real-time updates on inventory changes(Items and Transactions)
 * Exporting reports about Transactions(CSV, Excel) 
 * GitHub Actions (CI/CD)
+  
+# ⚙️ CI/CD Pipeline (Workflow Overview)
+* On every push/PR to master:
+    * Starts a SQL Server container
+    * Restores dependencies and builds the project
+    * Runs unit & integration tests
+* If tests pass:
+    * Logs into Docker Hub
+    * Builds and pushes the Docker image
 
 # Prerequisites
-✅ Скачать Docker - https://www.docker.com/products/docker-desktop/
+✅ Download Docker - https://www.docker.com/products/docker-desktop/
 
-✅ Docker Compose (идет в комплекте с Docker Desktop) 
+✅ Docker Compose (included with Docker Desktop)
 
-✅ Скачать Git - https://git-scm.com/downloads
+✅ Download Git - https://git-scm.com/downloads
 
 # Running the solution
 1️⃣ Clone Repository:  
