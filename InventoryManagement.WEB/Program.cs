@@ -13,11 +13,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using Serilog; 
-
-// add beautiful ui
-// add ci cd
-// delete comments
-// structure code
+ 
 namespace InventoryManagement.WEB
 {
     public class Program
