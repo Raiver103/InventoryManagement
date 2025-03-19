@@ -133,7 +133,7 @@ else
         // При редактировании заполняем форму данными существующего товара
         newItem = new ItemResponseDTO
             {
-               // Id = item.Id,
+                Id = item.Id,
                 Name = item.Name,
                 Category = item.Category,
                 Quantity = item.Quantity,
@@ -148,22 +148,5 @@ else
         await client.DeleteAsync($"api/item/{id}");
         // Обновляем список товаров после удаления
         items = await client.GetFromJsonAsync<List<ItemResponseDTO>>("api/item");
-    }
-
-    // private class ItemCreateDTO
-    // {
-    //     public string Name { get; set; }
-    //     public string Category { get; set; }
-    //     public int Quantity { get; set; }
-    //     public int LocationId { get; set; }
-    // }
-
-    // private class ItemResponseDTO
-    // {
-    //     public int Id { get; set; }
-    //     public string Name { get; set; }
-    //     public string Category { get; set; }
-    //     public int Quantity { get; set; }
-    //     public int LocationId { get; set; }
-    // }
+    } 
 }
