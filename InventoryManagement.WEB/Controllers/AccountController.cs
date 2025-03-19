@@ -55,9 +55,9 @@ namespace InventoryManagement.WEB.Controllers
         /// <returns>Перенаправление на страницу входа</returns>
         [HttpGet("AccessDenied")]
         [SwaggerOperation(Summary = "Перенаправляет на страницу входа при отказе в доступе")]
-        public IActionResult LoginUserRedirectAccessDenied(string returnUrl = "/unauthorized")
+        public IActionResult LoginUserRedirectAccessDenied(string returnUrl = "/")
         {
-            return Redirect("http://localhost:5000/unauthorized");
+            return Redirect("http://localhost:5000/login");
         }
 
         /// <summary>
