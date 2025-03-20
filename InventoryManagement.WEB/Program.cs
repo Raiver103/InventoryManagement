@@ -143,10 +143,7 @@ namespace InventoryManagement.WEB
             app.UseAuthentication();
             app.UseAuthorization();
 
-            app.MapControllers();
-            //app.MapControllerRoute(
-            //    name: "default",
-            //    pattern: "{controller=Home}/{action=Index}/{id?}");
+            app.MapControllers(); 
              
             app.MapRazorComponents<App>()
                     .AddInteractiveServerRenderMode();

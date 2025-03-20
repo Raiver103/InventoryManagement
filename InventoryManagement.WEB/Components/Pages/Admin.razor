@@ -101,11 +101,6 @@ else
             response = await client.PatchAsJsonAsync($"api/auth0/update-user/{editingUserId}", updateUser);
         }
 
-        if (!response.IsSuccessStatusCode)
-        {
-            Console.WriteLine($"Ошибка API: {response.StatusCode}, {await response.Content.ReadAsStringAsync()}");
-        }
-
         editingUserId = null;
         newUser = new CreateUserRequest();
         await LoadUsers();
@@ -125,18 +120,11 @@ else
 
     private async Task DeleteUser(string id)
     {
-        Console.WriteLine($"Удаление пользователя с ID: {id}");
         if (string.IsNullOrWhiteSpace(id)) return;
 
-        var encodedId = Uri.EscapeDataString(id); // Кодируем ID
+        var encodedId = Uri.EscapeDataString(id);
         var client = HttpClientFactory.CreateClient("ApiClient");
         var response = await client.DeleteAsync($"api/auth0/delete-user/{encodedId}");
-
-        if (!response.IsSuccessStatusCode)
-        {
-            var errorMessage = await response.Content.ReadAsStringAsync();
-            Console.WriteLine($"Ошибка удаления: {response.StatusCode}, {errorMessage}");
-        }
 
         await LoadUsers();
     }

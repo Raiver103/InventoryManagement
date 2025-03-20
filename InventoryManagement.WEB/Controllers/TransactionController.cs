@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.SignalR;
 using System.Text;
 using InventoryManagement.Infrastructure.Hubs;
 using InventoryManagement.Application.Interfaces;
-using Swashbuckle.AspNetCore.Annotations; // Добавлено для Swagger
+using Swashbuckle.AspNetCore.Annotations; 
 
 namespace InventoryManagement.WEB.Controllers
 {

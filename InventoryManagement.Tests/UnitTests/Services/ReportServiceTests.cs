@@ -48,17 +48,17 @@ namespace InventoryManagement.Tests.UnitTests.Services
         {
             // Arrange
             var transactions = new List<TransactionResponseDTO>
-        {
-            new TransactionResponseDTO
             {
-                Id = 1,
-                ItemId = 100,
-                FromLocationId = 200,
-                ToLocationId = 300,
-                UserId = "user123",
-                Timestamp = new DateTime(2024, 3, 16, 14, 30, 0)
-            }
-        };
+                new TransactionResponseDTO
+                {
+                    Id = 1,
+                    ItemId = 100,
+                    FromLocationId = 200,
+                    ToLocationId = 300,
+                    UserId = "user123",
+                    Timestamp = new DateTime(2024, 3, 16, 14, 30, 0)
+                }
+            };
 
             // Act
             byte[] excelData = _reportService.GenerateExcel(transactions);

@@ -23,10 +23,10 @@ namespace InventoryManagement.Tests.UnitTests.Services
         {
             // Arrange
             var locations = new List<Location>
-        {
-            new Location { Id = 1, Name = "Warehouse A", Address = "123 Street" },
-            new Location { Id = 2, Name = "Warehouse B", Address = "456 Avenue" }
-        };
+            {
+                new Location { Id = 1, Name = "Warehouse A", Address = "123 Street" },
+                new Location { Id = 2, Name = "Warehouse B", Address = "456 Avenue" }
+            };
 
             _locationRepositoryMock.Setup(repo => repo.GetAllAsync())
                 .ReturnsAsync(locations);
@@ -45,7 +45,12 @@ namespace InventoryManagement.Tests.UnitTests.Services
         {
             // Arrange
             var locationId = 1;
-            var expectedLocation = new Location { Id = locationId, Name = "Main Storage", Address = "789 Road" };
+            var expectedLocation = new Location 
+            { 
+                Id = locationId,
+                Name = "Main Storage",
+                Address = "789 Road" 
+            };
 
             _locationRepositoryMock.Setup(repo => repo.GetByIdAsync(locationId))
                 .ReturnsAsync(expectedLocation);

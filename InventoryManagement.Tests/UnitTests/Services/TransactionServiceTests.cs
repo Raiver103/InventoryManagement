@@ -54,7 +54,14 @@ namespace InventoryManagement.Tests.UnitTests.Services
         {
             // Arrange
             var transactionId = 1;
-            var expectedTransaction = new Transaction { Id = transactionId, ItemId = 10, FromLocationId = 1, ToLocationId = 2, UserId = "user1" };
+            var expectedTransaction = new Transaction 
+            {
+                Id = transactionId, 
+                ItemId = 10, 
+                FromLocationId = 1, 
+                ToLocationId = 2, 
+                UserId = "user1" 
+            };
 
             _transactionRepositoryMock.Setup(repo => repo.GetByIdAsync(transactionId))
                 .ReturnsAsync(expectedTransaction);
@@ -75,7 +82,8 @@ namespace InventoryManagement.Tests.UnitTests.Services
                 .ReturnsAsync((Transaction)null);
 
             // Act & Assert
-            await Assert.ThrowsAsync<KeyNotFoundException>(() => _transactionService.GetTransactionById(999));
+            await Assert.ThrowsAsync<KeyNotFoundException>(() 
+                => _transactionService.GetTransactionById(999));
         }
 
         [Fact]
@@ -121,10 +129,8 @@ namespace InventoryManagement.Tests.UnitTests.Services
             result.ToLocationId.Should().Be(transactionCreateDto.ToLocationId);
             result.UserId.Should().Be(transactionCreateDto.UserId);
 
-            // Проверяем, что у предмета обновился LocationId
             item.LocationId.Should().Be(transactionCreateDto.ToLocationId);
 
-            // Проверяем, что методы были вызваны 1 раз
             _itemRepositoryMock.Verify(repo => repo.UpdateAsync(item), Times.Once);
             _transactionRepositoryMock.Verify(repo => repo.AddAsync(It.Is<Transaction>(t =>
                 t.ItemId == transactionCreateDto.ItemId &&
@@ -146,6 +152,7 @@ namespace InventoryManagement.Tests.UnitTests.Services
                 ToLocationId = 2,
                 UserId = "user1"
             };
+
             var transaction = new Transaction
             {
                 ItemId = transactionCreateDto.ItemId,
@@ -154,6 +161,7 @@ namespace InventoryManagement.Tests.UnitTests.Services
                 UserId = transactionCreateDto.UserId,
                 Timestamp = transactionCreateDto.Timestamp
             };
+
             _itemRepositoryMock.Setup(repo => repo.GetByIdAsync(transaction.ItemId))
                 .ReturnsAsync((Item)null);
             
@@ -176,6 +184,7 @@ namespace InventoryManagement.Tests.UnitTests.Services
                 ToLocationId = 2,
                 UserId = "user1"
             };
+
             var transaction = new Transaction
             {
                 ItemId = transactionCreateDto.ItemId,

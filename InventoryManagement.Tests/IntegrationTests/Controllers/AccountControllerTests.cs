@@ -54,7 +54,7 @@ namespace InventoryManagement.Tests.IntegrationTests.Controllers
             var urlHelperMock = new Mock<IUrlHelper>();
             urlHelperMock
                 .Setup(x => x.Action(It.IsAny<UrlActionContext>()))
-                .Returns("https://localhost:7025/home");
+                .Returns("http://localhost:5000/home");
 
             _controller.ControllerContext = new ControllerContext()
             {

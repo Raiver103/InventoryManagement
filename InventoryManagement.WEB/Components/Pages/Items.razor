@@ -53,14 +53,14 @@ else
 }
 
 @code {
-    private List<ItemResponseDTO> items; // Используем Response DTO для списка товаров
-    private ItemResponseDTO newItem = new ItemResponseDTO(); // Используем Create DTO для нового/редактируемого товара
+    private List<ItemResponseDTO> items; 
+    private ItemResponseDTO newItem = new ItemResponseDTO(); 
     private HubConnection hubConnection;
 
     protected override async Task OnInitializedAsync()
     {
         var client = HttpClientFactory.CreateClient("ApiClient");
-        // Получаем список товаров с API
+
         items = await client.GetFromJsonAsync<List<ItemResponseDTO>>("api/item");
         hubConnection = new HubConnectionBuilder()
             .WithUrl("http://inventory_api:8080/inventoryHub")
@@ -84,7 +84,7 @@ else
                     items.Add(updatedItem);
                 }
 
-                StateHasChanged(); // Обновление UI
+                StateHasChanged(); 
             });
         });
         hubConnection.On<int>("ItemDeleted", async (deletedItemId) =>
@@ -94,9 +94,9 @@ else
                 var itemToRemove = items.FirstOrDefault(i => i.Id == deletedItemId);
                 if (itemToRemove != null)
                 {
-                    items.Remove(itemToRemove); // Удаляем из списка
+                    items.Remove(itemToRemove);
                 }
-                StateHasChanged(); // Перерисовываем UI
+                StateHasChanged();
             });
         });
 
@@ -130,7 +130,6 @@ else
 
     private void EditItem(ItemResponseDTO item)
     {
-        // При редактировании заполняем форму данными существующего товара
         newItem = new ItemResponseDTO
             {
                 Id = item.Id,
@@ -144,9 +143,9 @@ else
     private async Task DeleteItem(int id)
     {
         var client = HttpClientFactory.CreateClient("ApiClient");
-        // Отправляем запрос на удаление товара
+
         await client.DeleteAsync($"api/item/{id}");
-        // Обновляем список товаров после удаления
+
         items = await client.GetFromJsonAsync<List<ItemResponseDTO>>("api/item");
     } 
 }

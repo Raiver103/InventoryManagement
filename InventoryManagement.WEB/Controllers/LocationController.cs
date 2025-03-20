@@ -3,7 +3,7 @@ using InventoryManagement.Application.DTOs.Location;
 using InventoryManagement.Application.Interfaces;
 using InventoryManagement.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
-using Swashbuckle.AspNetCore.Annotations; // Добавлено для Swagger
+using Swashbuckle.AspNetCore.Annotations; 
 
 namespace InventoryManagement.WEB.Controllers
 {

@@ -1,7 +1,7 @@
 ﻿using InventoryManagement.Application.DTOs.Transaction;
 using InventoryManagement.Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using Swashbuckle.AspNetCore.Annotations; // Добавлено для Swagger
+using Swashbuckle.AspNetCore.Annotations; 
 using System.Text;
 
 namespace InventoryManagement.WEB.Controllers

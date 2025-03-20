@@ -65,9 +65,12 @@ namespace InventoryManagement.Tests.UnitTests.Services
             // Arrange
             var userId = "test-user-id";
             var role = "Admin";
-            _accountRepositoryMock.Setup(repo => repo.GetUserRolesAsync(userId)).ReturnsAsync(new List<string>());
-            _auth0RepositoryMock.Setup(repo => repo.GetRoleId(role)).Returns("role-id");
-            var claimsPrincipal = new ClaimsPrincipal(new ClaimsIdentity(new[] { new Claim(ClaimTypes.NameIdentifier, userId) }, "mock"));
+            _accountRepositoryMock.Setup(repo 
+                => repo.GetUserRolesAsync(userId)).ReturnsAsync(new List<string>());
+            _auth0RepositoryMock.Setup(repo 
+                => repo.GetRoleId(role)).Returns("role-id");
+            var claimsPrincipal = new ClaimsPrincipal(
+                new ClaimsIdentity(new[] { new Claim(ClaimTypes.NameIdentifier, userId) }, "mock"));
 
             // Act
             await _accountService.AssignRoleAfterLoginAsync(claimsPrincipal, role);
@@ -82,14 +85,17 @@ namespace InventoryManagement.Tests.UnitTests.Services
             // Arrange
             var userId = "test-user-id";
             var role = "Admin";
-            _accountRepositoryMock.Setup(repo => repo.GetUserRolesAsync(userId)).ReturnsAsync(new List<string> { role });
-            var claimsPrincipal = new ClaimsPrincipal(new ClaimsIdentity(new[] { new Claim(ClaimTypes.NameIdentifier, userId) }, "mock"));
+            _accountRepositoryMock.Setup(repo 
+                => repo.GetUserRolesAsync(userId)).ReturnsAsync(new List<string> { role });
+            var claimsPrincipal = new ClaimsPrincipal(
+                new ClaimsIdentity(new[] { new Claim(ClaimTypes.NameIdentifier, userId) }, "mock"));
 
             // Act
             await _accountService.AssignRoleAfterLoginAsync(claimsPrincipal, role);
 
             // Assert
-            _accountRepositoryMock.Verify(repo => repo.AssignRoleAsync(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+            _accountRepositoryMock.Verify(repo 
+                => repo.AssignRoleAsync(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
         }
 
         [Fact]
@@ -99,7 +105,8 @@ namespace InventoryManagement.Tests.UnitTests.Services
             var claimsPrincipal = new ClaimsPrincipal(new ClaimsIdentity(new Claim[0], "mock"));
 
             // Act & Assert
-            await Assert.ThrowsAsync<Exception>(() => _accountService.AssignRoleAfterLoginAsync(claimsPrincipal, "Admin"));
+            await Assert.ThrowsAsync<Exception>(() 
+                => _accountService.AssignRoleAfterLoginAsync(claimsPrincipal, "Admin"));
         }
 
         [Fact]
@@ -107,12 +114,16 @@ namespace InventoryManagement.Tests.UnitTests.Services
         {
             // Arrange
             var userId = "test-user-id";
-            _accountRepositoryMock.Setup(repo => repo.GetUserRolesAsync(userId)).ReturnsAsync(new List<string>());
-            _auth0RepositoryMock.Setup(repo => repo.GetRoleId(It.IsAny<string>())).Returns((string)null);
-            var claimsPrincipal = new ClaimsPrincipal(new ClaimsIdentity(new[] { new Claim(ClaimTypes.NameIdentifier, userId) }, "mock"));
+            _accountRepositoryMock.Setup(repo 
+                => repo.GetUserRolesAsync(userId)).ReturnsAsync(new List<string>());
+            _auth0RepositoryMock.Setup(repo 
+                => repo.GetRoleId(It.IsAny<string>())).Returns((string)null);
+            var claimsPrincipal = new ClaimsPrincipal(
+                new ClaimsIdentity(new[] { new Claim(ClaimTypes.NameIdentifier, userId) }, "mock"));
 
             // Act & Assert
-            await Assert.ThrowsAsync<Exception>(() => _accountService.AssignRoleAfterLoginAsync(claimsPrincipal, "InvalidRole"));
+            await Assert.ThrowsAsync<Exception>(() 
+                => _accountService.AssignRoleAfterLoginAsync(claimsPrincipal, "InvalidRole"));
         } 
 
         [Fact]

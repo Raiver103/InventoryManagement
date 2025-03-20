@@ -23,10 +23,10 @@ namespace InventoryManagement.Tests.UnitTests.Services
         {
             // Arrange
             var items = new List<Item>
-        {
-            new Item { Id = 1, Name = "Laptop", Quantity = 5 },
-            new Item { Id = 2, Name = "Mouse", Quantity = 10 }
-        };
+            {
+                new Item { Id = 1, Name = "Laptop", Quantity = 5 },
+                new Item { Id = 2, Name = "Mouse", Quantity = 10 }
+            };
 
             _itemRepositoryMock.Setup(repo => repo.GetAllAsync())
                 .ReturnsAsync(items);
@@ -66,7 +66,8 @@ namespace InventoryManagement.Tests.UnitTests.Services
                 .ReturnsAsync((Item)null);
 
             // Act & Assert
-            await Assert.ThrowsAsync<KeyNotFoundException>(() => _itemService.GetItemById(999));
+            await Assert.ThrowsAsync<KeyNotFoundException>(() 
+                => _itemService.GetItemById(999));
         }
 
         [Fact]
